@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RecycleHub Platform V1.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     PAGE: LOGIN
+════════════════════════════════════════ -->
+<div class="page active" id="page-login">
+  <div class="auth-wrap">
+    <div class="auth-left">
+      <div class="auth-left-bg"></div>
+      <div class="auth-brand">
+        <div class="auth-logo">Recycle<span>Hub</span></div>
+        <p class="auth-tagline">Connecting communities with responsible waste management, one drop-off at a time.</p>
+      </div>
+      <div class="auth-features">
+        <div class="auth-feat">
+          <div class="auth-feat-icon">📍</div>
+          <div class="auth-feat-text"><strong>Find Nearby Centers</strong>Real-time geolocation to locate recycling drop-offs near you.</div>
+        </div>
+        <div class="auth-feat">
+          <div class="auth-feat-icon">♻️</div>
+          <div class="auth-feat-text"><strong>Material Guides</strong>EPA-aligned information on what can and can't be recycled.</div>
+        </div>
+        <div class="auth-feat">
+          <div class="auth-feat-icon">🔔</div>
+          <div class="auth-feat-text"><strong>Smart Reminders</strong>Get notified about recycling days and center updates.</div>
+        </div>
+        <div class="auth-feat">
+          <div class="auth-feat-icon">📊</div>
+          <div class="auth-feat-text"><strong>Analytics Dashboard</strong>Track participation and generate reports as an admin.</div>
+        </div>
+      </div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-form-box">
+        <h2>Welcome back</h2>
+        <p>Sign in to your RecycleHub account</p>
+        <div class="error-msg" id="login-error">Invalid email or password. Please try again.</div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="login-email" placeholder="you@example.com" value="user@recyclehub.com" oninput="hintLoginRole()">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-pass" placeholder="••••••••" value="password">
+        </div>
+        <input type="hidden" id="login-role" value="">
+        <div id="login-role-hint" style="display:none;margin-bottom:1rem;padding:.6rem 1rem;border-radius:8px;font-size:.82rem;font-weight:600;background:rgba(74,158,107,.08);border:1px solid rgba(74,158,107,.2);color:var(--leaf);">🔐 Signing in as: <span id="role-hint-text"></span></div>
+        <div style="font-size:.78rem;color:#aab8b0;margin-bottom:1rem;line-height:1.5;">Your account role is set when you register and cannot be changed at login.</div>
+        <button class="btn btn-green" onclick="doLogin()">Sign In</button>
+        <div class="auth-switch">Don't have an account? <a onclick="showPage('page-register')">Create one</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: REGISTER
+════════════════════════════════════════ -->
+<div class="page" id="page-register">
+  <div class="auth-wrap">
+    <div class="auth-left">
+      <div class="auth-left-bg"></div>
+      <div class="auth-brand">
+        <div class="auth-logo">Recycle<span>Hub</span></div>
+        <p class="auth-tagline">Join thousands of users making a real environmental impact through smarter recycling.</p>
+      </div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-form-box">
+        <h2>Create account</h2>
+        <p>Join RecycleHub and start recycling smarter</p>
+        <div class="error-msg" id="reg-error">Please fill in all fields.</div>
+        <label style="font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--forest);display:block;margin-bottom:.6rem;">I am a...</label>
+        <div class="role-selector" id="reg-role-select">
+          <div class="role-opt selected" data-role="user" onclick="selectRole(this)">
+            <div class="role-icon">🧍</div>
+            <div class="role-name">General User</div>
+          </div>
+          <div class="role-opt" data-role="operator" onclick="selectRole(this)">
+            <div class="role-icon">🏭</div>
+            <div class="role-name">Operator</div>
+          </div>
+          <div class="role-opt" data-role="admin" onclick="selectRole(this)">
+            <div class="role-icon">🔑</div>
+            <div class="role-name">Admin</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" id="reg-fname" placeholder="Maria"></div>
+          <div class="form-group"><label>Last Name</label><input type="text" id="reg-lname" placeholder="Santos"></div>
+        </div>
+        <div class="form-group"><label>Email Address</label><input type="email" id="reg-email" placeholder="you@example.com"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="reg-pass" placeholder="Create a strong password"></div>
+        <div class="form-group"><label>Location / City</label><input type="text" id="reg-location" placeholder="e.g. Quezon City, Metro Manila"></div>
+        <button class="btn btn-green" onclick="doRegister()">Create Account</button>
+        <div class="auth-switch">Already have an account? <a onclick="showPage('page-login')">Sign in</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: MAIN APP
+════════════════════════════════════════ -->
+<div class="page" id="page-app">
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">Recycle<span>Hub</span></div>
+      <div class="sidebar-user">
+        <div class="sidebar-user-name" id="sb-name">Maria Santos</div>
+        <div class="sidebar-user-role" id="sb-role">General User</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <div class="nav-item active" onclick="switchView('dashboard',this)" data-roles="all">
+          <span class="nav-icon">🏠</span> Dashboard
+        </div>
+        <div class="nav-item" onclick="switchView('map',this)" data-roles="all">
+          <span class="nav-icon">📍</span> Find Centers
+        </div>
+        <div class="nav-item" onclick="switchView('materials',this)" data-roles="all">
+          <span class="nav-icon">♻️</span> Material Guide
+        </div>
+        <div class="nav-item" onclick="switchView('notifications',this)" data-roles="all">
+          <span class="nav-icon">🔔</span> Notifications
+        </div>
+
+        <div class="nav-section-label">Account</div>
+        <div class="nav-item" onclick="switchView('profile',this)" data-roles="all">
+          <span class="nav-icon">👤</span> My Profile
+        </div>
+
+        <div class="nav-section-label operator-section admin-section" style="display:none">Manage</div>
+        <div class="nav-item operator-nav admin-nav" style="display:none" onclick="switchView('operator',this)">
+          <span class="nav-icon">🏢</span> My Center
+        </div>
+        <div class="nav-item admin-nav" style="display:none" onclick="switchView('admin',this)">
+          <span class="nav-icon">⚙️</span> Admin Panel
+        </div>
+        <div class="nav-item admin-nav" style="display:none" onclick="switchView('users',this)">
+          <span class="nav-icon">👥</span> Manage Users
+        </div>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="logout-btn" onclick="doLogout()">
+          <span>🚪</span> Sign Out
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+      <div class="topbar">
+        <div class="topbar-title" id="view-title">Dashboard</div>
+        <div class="topbar-right">
+          <div class="notif-bell" onclick="switchView('notifications',null)">
+            🔔<span class="notif-badge" id="notif-badge">3</span>
+          </div>
+          <span style="font-size:.85rem;color:#7a8b80;" id="topbar-user">Maria S.</span>
+        </div>
+      </div>
+
+      <!-- ── VIEW: DASHBOARD ── -->
+      <div id="view-dashboard" class="content-area">
+        <div class="dash-grid" id="kpi-grid"></div>
+        <div class="dash-row">
+          <div class="dash-card">
+            <div class="dash-card-title">📋 Recent Activity</div>
+            <table class="data-table" id="recent-activity-table">
+              <thead><tr><th>Action</th><th>Location</th><th>Date</th><th>Status</th></tr></thead>
+              <tbody id="recent-activity-body"></tbody>
+            </table>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-title">🔔 Latest Notifications</div>
+            <div id="dash-notifs"></div>
+          </div>
+        </div>
+        <div class="dash-card" style="margin-bottom:1.5rem;">
+          <div class="dash-card-title">🌍 Quick Stats — Recycling Impact</div>
+          <div class="chart-bar-wrap" id="impact-bars"></div>
+        </div>
+      </div>
+
+      <!-- ── VIEW: MAP ── -->
+      <div id="view-map" style="display:none;">
+        <div class="map-layout">
+          <div class="map-sidebar">
+            <div class="map-search-wrap">
+              <input class="map-search" id="center-search" placeholder="🔍  Search centers..." oninput="filterCenters()">
+              <div class="filter-chips">
+                <div class="chip active" onclick="filterChip(this,'all')">All</div>
+                <div class="chip" onclick="filterChip(this,'plastic')">Plastic</div>
+                <div class="chip" onclick="filterChip(this,'metal')">Metal</div>
+                <div class="chip" onclick="filterChip(this,'paper')">Paper</div>
+                <div class="chip" onclick="filterChip(this,'electronics')">E-Waste</div>
+              </div>
+            </div>
+            <div class="center-list" id="center-list"></div>
+          </div>
+          <div class="map-canvas">
+            <div class="map-visual" id="map-visual">
+              <div class="map-grid"></div>
+              <!-- roads -->
+              <div class="map-road-h" style="top:30%"></div>
+              <div class="map-road-h" style="top:55%"></div>
+              <div class="map-road-h" style="top:75%"></div>
+              <div class="map-road-v" style="left:25%"></div>
+              <div class="map-road-v" style="left:50%"></div>
+              <div class="map-road-v" style="left:72%"></div>
+              <div id="map-pins"></div>
+              <div class="map-popup" id="map-popup"></div>
+              <div style="position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);display:flex;gap:1rem;font-size:.72rem;color:rgba(245,240,232,.5);">
+                <span>🟢 Open</span><span>🟡 Limited</span><span>🔴 Closed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── VIEW: MATERIALS ── -->
+      <div id="view-materials" style="display:none;">
+        <div class="materials-header">
+          <input class="materials-search" id="material-search" placeholder="🔍  Search materials (e.g. plastic bottle, cardboard)..." oninput="filterMaterials()">
+          <div class="filter-chips">
+            <div class="chip active" onclick="filterMatChip(this,'all')">All</div>
+            <div class="chip" onclick="filterMatChip(this,'recyclable')">✅ Recyclable</div>
+            <div class="chip" onclick="filterMatChip(this,'not')">❌ Not Recyclable</div>
+            <div class="chip" onclick="filterMatChip(this,'special')">⚠️ Special Handling</div>
+          </div>
+        </div>
+        <div class="materials-grid" id="materials-grid"></div>
+      </div>
+
+      <!-- ── VIEW: NOTIFICATIONS ── -->
+      <div id="view-notifications" style="display:none;">
+        <div class="notif-view">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+            <div>
+              <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:var(--forest);">Notifications</div>
+              <div style="font-size:.85rem;color:#7a8b80;margin-top:.2rem;">Stay up to date with recycling activities</div>
+            </div>
+            <button class="inline-btn secondary" onclick="markAllRead()">Mark all read</button>
+          </div>
+          <div class="notif-list-view" id="notif-list-view"></div>
+        </div>
+      </div>
+
+      <!-- ── VIEW: PROFILE ── -->
+      <div id="view-profile" style="display:none;">
+        <div class="profile-layout">
+          <div>
+            <div class="profile-card">
+              <div class="profile-avatar" id="profile-avatar">🧍</div>
+              <div class="profile-name" id="profile-name">Maria Santos</div>
+              <div class="profile-role" id="profile-role">General User</div>
+              <div class="profile-stats" id="profile-stats"></div>
+            </div>
+          </div>
+          <div>
+            <div class="profile-form-card">
+              <div class="section-title">Personal Information</div>
+              <div class="form-row">
+                <div class="form-group"><label>First Name</label><input id="pf-fname" type="text"></div>
+                <div class="form-group"><label>Last Name</label><input id="pf-lname" type="text"></div>
+              </div>
+              <div class="form-group"><label>Email</label><input id="pf-email" type="email"></div>
+              <div class="form-group"><label>Location</label><input id="pf-location" type="text"></div>
+              <div class="form-group"><label>Bio</label><textarea id="pf-bio" placeholder="Tell the community about your recycling journey..."></textarea></div>
+              <button class="inline-btn" onclick="saveProfile()">Save Changes</button>
+            </div>
+            <div class="profile-form-card" style="margin-top:1.2rem;">
+              <div class="section-title">Notification Preferences</div>
+              <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" checked> Email notifications for new centers nearby</label>
+                <label class="checkbox-item"><input type="checkbox" checked> Weekly recycling reminders</label>
+                <label class="checkbox-item"><input type="checkbox"> SMS alerts for center updates</label>
+                <label class="checkbox-item"><input type="checkbox" checked> Community milestone alerts</label>
+              </div>
+              <br><button class="inline-btn" onclick="showToast('Preferences saved!')">Save Preferences</button>
+            </div>
+            <div class="profile-form-card" style="margin-top:1.2rem;">
+              <div class="section-title">Change Password</div>
+              <div class="form-group"><label>Current Password</label><input type="password" placeholder="••••••••"></div>
+              <div class="form-row">
+                <div class="form-group"><label>New Password</label><input type="password" placeholder="••••••••"></div>
+                <div class="form-group"><label>Confirm Password</label><input type="password" placeholder="••••••••"></div>
+              </div>
+              <button class="inline-btn" onclick="showToast('Password updated!')">Update Password</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── VIEW: OPERATOR ── -->
+      <div id="view-operator" style="display:none;">
+        <div class="operator-grid">
+          <div class="op-card" style="grid-column:span 2;">
+            <div class="op-card-title">🏢 My Recycling Center Details</div>
+            <div class="form-row">
+              <div class="form-group"><label>Center Name</label><input id="op-name" type="text" value="GreenPoint Recycling Center"></div>
+              <div class="form-group"><label>Contact Number</label><input id="op-phone" type="text" value="+63 912 345 6789"></div>
+            </div>
+            <div class="form-group"><label>Address</label><input id="op-addr" type="text" value="123 Eco Street, Quezon City"></div>
+            <div class="form-row">
+              <div class="form-group"><label>Opening Time</label><input id="op-open" type="time" value="08:00"></div>
+              <div class="form-group"><label>Closing Time</label><input id="op-close" type="time" value="17:00"></div>
+            </div>
+            <div class="form-group"><label>Operating Days</label>
+              <div class="checkbox-group" style="flex-direction:row;flex-wrap:wrap;gap:.8rem;margin-top:.3rem;">
+                <label class="checkbox-item"><input type="checkbox" checked> Mon</label>
+                <label class="checkbox-item"><input type="checkbox" checked> Tue</label>
+                <label class="checkbox-item"><input type="checkbox" checked> Wed</label>
+                <label class="checkbox-item"><input type="checkbox" checked> Thu</label>
+                <label class="checkbox-item"><input type="checkbox" checked> Fri</label>
+                <label class="checkbox-item"><input type="checkbox"> Sat</label>
+                <label class="checkbox-item"><input type="checkbox"> Sun</label>
+              </div>
+            </div>
+            <button class="inline-btn" onclick="showToast('Center details updated successfully!')">Save Details</button>
+          </div>
+          <div class="op-card">
+            <div class="op-card-title">♻️ Accepted Materials</div>
+            <div class="checkbox-group" id="op-materials">
+              <label class="checkbox-item"><input type="checkbox" checked> Plastic Bottles (PET)</label>
+              <label class="checkbox-item"><input type="checkbox" checked> Cardboard / Paper</label>
+              <label class="checkbox-item"><input type="checkbox" checked> Aluminum Cans</label>
+              <label class="checkbox-item"><input type="checkbox"> Glass Bottles</label>
+              <label class="checkbox-item"><input type="checkbox" checked> Electronics / E-Waste</label>
+              <label class="checkbox-item"><input type="checkbox"> Batteries</label>
+              <label class="checkbox-item"><input type="checkbox" checked> Steel / Metal Scrap</label>
+              <label class="checkbox-item"><input type="checkbox"> Textiles</label>
+              <label class="checkbox-item"><input type="checkbox"> Cooking Oil</label>
+            </div>
+            <br><button class="inline-btn" onclick="showToast('Accepted materials updated!')">Update Materials</button>
+          </div>
+          <div class="op-card">
+            <div class="op-card-title">📊 Center Performance</div>
+            <div class="chart-bar-wrap">
+              <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;">
+                <span style="font-size:.82rem;color:#556b5e;width:130px;">Visits This Month</span>
+                <div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:74%"></div></div>
+                <span style="font-size:.8rem;font-weight:700;color:var(--forest);width:35px;text-align:right;">74%</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;">
+                <span style="font-size:.82rem;color:#556b5e;width:130px;">5-Star Ratings</span>
+                <div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:89%"></div></div>
+                <span style="font-size:.8rem;font-weight:700;color:var(--forest);width:35px;text-align:right;">89%</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;">
+                <span style="font-size:.82rem;color:#556b5e;width:130px;">Materials Accepted</span>
+                <div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:60%"></div></div>
+                <span style="font-size:.8rem;font-weight:700;color:var(--forest);width:35px;text-align:right;">60%</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:.8rem;">
+                <span style="font-size:.82rem;color:#556b5e;width:130px;">Repeat Visitors</span>
+                <div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:55%"></div></div>
+                <span style="font-size:.8rem;font-weight:700;color:var(--forest);width:35px;text-align:right;">55%</span>
+              </div>
+            </div>
+            <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid rgba(74,158,107,.1);">
+              <div style="font-size:.85rem;color:#556b5e;">Send Update to Subscribers</div>
+              <div class="form-group" style="margin-top:.6rem;margin-bottom:.6rem;">
+                <textarea placeholder="e.g. We are now accepting glass bottles starting Monday..." style="width:100%;padding:.7rem;border-radius:8px;border:1.5px solid rgba(74,158,107,.2);background:var(--cream);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;resize:vertical;min-height:70px;"></textarea>
+              </div>
+              <button class="inline-btn" onclick="showToast('Notification sent to 128 subscribers!')">Send Notification</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── VIEW: ADMIN PANEL ── -->
+      <div id="view-admin" style="display:none;">
+        <div class="admin-tabs">
+          <div class="admin-tab active" onclick="switchAdminTab('overview',this)">Overview</div>
+          <div class="admin-tab" onclick="switchAdminTab('reports',this)">Reports</div>
+          <div class="admin-tab" onclick="switchAdminTab('centers',this)">Centers</div>
+          <div class="admin-tab" onclick="switchAdminTab('notifications',this)">Notifications</div>
+        </div>
+        <div id="admin-overview" class="admin-tab-content active">
+          <div class="dash-grid" style="margin-bottom:1.5rem;">
+            <div class="kpi-card"><div class="kpi-icon">👥</div><div class="kpi-value">1,284</div><div class="kpi-label">Total Registered Users</div><div class="kpi-change up">↑ 12% this month</div></div>
+            <div class="kpi-card"><div class="kpi-icon">🏢</div><div class="kpi-value">47</div><div class="kpi-label">Active Recycling Centers</div><div class="kpi-change up">↑ 3 new this week</div></div>
+            <div class="kpi-card"><div class="kpi-icon">♻️</div><div class="kpi-value">8.2t</div><div class="kpi-label">Materials Recycled (Month)</div><div class="kpi-change up">↑ 18% vs last month</div></div>
+          </div>
+          <div class="dash-row">
+            <div class="dash-card">
+              <div class="dash-card-title">📊 Platform Analytics</div>
+              <div class="chart-bar-wrap">
+                <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;"><span style="font-size:.82rem;color:#556b5e;width:180px;">Daily Active Users</span><div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:78%"></div></div><span style="font-size:.8rem;font-weight:700;color:var(--forest);width:40px;text-align:right;">78%</span></div>
+                <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;"><span style="font-size:.82rem;color:#556b5e;width:180px;">Center Listings Updated</span><div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:63%"></div></div><span style="font-size:.8rem;font-weight:700;color:var(--forest);width:40px;text-align:right;">63%</span></div>
+                <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;"><span style="font-size:.82rem;color:#556b5e;width:180px;">Notification Open Rate</span><div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:91%"></div></div><span style="font-size:.8rem;font-weight:700;color:var(--forest);width:40px;text-align:right;">91%</span></div>
+                <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;"><span style="font-size:.82rem;color:#556b5e;width:180px;">Recycling Participation</span><div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:55%"></div></div><span style="font-size:.8rem;font-weight:700;color:var(--forest);width:40px;text-align:right;">55%</span></div>
+                <div style="display:flex;align-items:center;gap:.8rem;"><span style="font-size:.82rem;color:#556b5e;width:180px;">Partner Retention Rate</span><div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:88%"></div></div><span style="font-size:.8rem;font-weight:700;color:var(--forest);width:40px;text-align:right;">88%</span></div>
+              </div>
+            </div>
+            <div class="dash-card">
+              <div class="dash-card-title">⚡ System Status</div>
+              <div style="display:flex;flex-direction:column;gap:.8rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem;background:rgba(74,158,107,.05);border-radius:8px;">
+                  <span style="font-size:.85rem;color:var(--forest);">🌐 Geolocation API</span><span class="badge badge-green">Online</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem;background:rgba(74,158,107,.05);border-radius:8px;">
+                  <span style="font-size:.85rem;color:var(--forest);">🔔 Notification Service</span><span class="badge badge-green">Online</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem;background:rgba(74,158,107,.05);border-radius:8px;">
+                  <span style="font-size:.85rem;color:var(--forest);">🗄️ Database</span><span class="badge badge-green">Healthy</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem;background:rgba(232,167,74,.05);border-radius:8px;">
+                  <span style="font-size:.85rem;color:var(--forest);">☁️ Cloud Storage</span><span class="badge badge-amber">~85% Used</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem;background:rgba(74,158,107,.05);border-radius:8px;">
+                  <span style="font-size:.85rem;color:var(--forest);">🔐 Auth Service</span><span class="badge badge-green">Secure</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="admin-reports" class="admin-tab-content">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+            <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--forest);">Generate Reports</div>
+            <button class="inline-btn" onclick="showToast('Report exported as PDF!')">⬇ Export PDF</button>
+          </div>
+          <div class="form-row" style="margin-bottom:1.5rem;max-width:500px;">
+            <div class="form-group"><label>From Date</label><input type="date" value="2025-01-01"></div>
+            <div class="form-group"><label>To Date</label><input type="date" value="2025-03-07"></div>
+          </div>
+          <div class="dash-grid" style="margin-bottom:1.5rem;">
+            <div class="kpi-card"><div class="kpi-icon">🧾</div><div class="kpi-value">3,210</div><div class="kpi-label">Total Drop-offs Logged</div></div>
+            <div class="kpi-card"><div class="kpi-icon">🏆</div><div class="kpi-value">Top: Plastic</div><div class="kpi-label">Most Recycled Material</div></div>
+            <div class="kpi-card"><div class="kpi-icon">📍</div><div class="kpi-value">EcoPoint QC</div><div class="kpi-label">Most Active Center</div></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-title">📈 Monthly Recycling Volume by Material</div>
+            <div style="display:flex;flex-direction:column;gap:.8rem;">
+              <div style="display:flex;align-items:center;gap:.8rem;"><span style="font-size:.82rem;color:#556b5e;width:160px;">♻️ Plastic (PET)</span><div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:82%"></div></div><span style="font-size:.8rem;font-weight:700;color:var(--forest);">2,130 kg</span></div>
+              <div style="display:flex;align-items:center;gap:.8rem;"><span style="font-size:.82rem;color:#556b5e;width:160px;">📦 Cardboard</span><div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:67%"></div></div><span style="font-size:.8rem;font-weight:700;color:var(--forest);">1,740 kg</span></div>
+              <div style="display:flex;align-items:center;gap:.8rem;"><span style="font-size:.82rem;color:#556b5e;width:160px;">🥫 Aluminum</span><div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:45%"></div></div><span style="font-size:.8rem;font-weight:700;color:var(--forest);">1,160 kg</span></div>
+              <div style="display:flex;align-items:center;gap:.8rem;"><span style="font-size:.82rem;color:#556b5e;width:160px;">💻 E-Waste</span><div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:30%"></div></div><span style="font-size:.8rem;font-weight:700;color:var(--forest);">780 kg</span></div>
+              <div style="display:flex;align-items:center;gap:.8rem;"><span style="font-size:.82rem;color:#556b5e;width:160px;">🔩 Metal Scrap</span><div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:22%"></div></div><span style="font-size:.8rem;font-weight:700;color:var(--forest);">570 kg</span></div>
+            </div>
+          </div>
+        </div>
+        <div id="admin-centers" class="admin-tab-content">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+            <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--forest);">All Recycling Centers</div>
+            <button class="inline-btn" onclick="openAddCenter()">+ Add Center</button>
+          </div>
+          <div class="dash-card">
+            <table class="data-table" id="admin-centers-table">
+              <thead><tr><th>Name</th><th>Location</th><th>Materials</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="admin-centers-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="admin-notifications" class="admin-tab-content">
+          <div style="max-width:600px;">
+            <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--forest);margin-bottom:1.5rem;">Send Platform Notification</div>
+            <div class="op-card">
+              <div class="form-group"><label>Notification Title</label><input type="text" placeholder="e.g. New Center Available in Your Area"></div>
+              <div class="form-group"><label>Message</label><textarea placeholder="Write your notification message here..."></textarea></div>
+              <div class="form-group"><label>Send To</label>
+                <select><option>All Users</option><option>General Users Only</option><option>Operators Only</option><option>Specific City</option></select>
+              </div>
+              <div class="form-group"><label>Schedule</label>
+                <select><option>Send Now</option><option>Schedule for Later</option></select>
+              </div>
+              <button class="inline-btn" onclick="showToast('Notification sent to 1,284 users!')">Send Notification</button>
+            </div>
+            <div style="margin-top:1.5rem;">
+              <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--forest);margin-bottom:1rem;">Sent Notifications Log</div>
+              <div class="dash-card">
+                <table class="data-table">
+                  <thead><tr><th>Title</th><th>Sent To</th><th>Date</th><th>Open Rate</th></tr></thead>
+                  <tbody>
+                    <tr><td>New E-Waste Center Open</td><td>All Users</td><td>Mar 5, 2025</td><td><span class="badge badge-green">94%</span></td></tr>
+                    <tr><td>Weekly Recycling Reminder</td><td>All Users</td><td>Mar 3, 2025</td><td><span class="badge badge-green">88%</span></td></tr>
+                    <tr><td>Partner Update: EcoPoint</td><td>QC Users</td><td>Feb 28, 2025</td><td><span class="badge badge-amber">71%</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── VIEW: MANAGE USERS (ADMIN) ── -->
+      <div id="view-users" style="display:none;">
+        <div class="content-area">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+            <div>
+              <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:var(--forest);">User Management</div>
+              <div style="font-size:.85rem;color:#7a8b80;margin-top:.2rem;">Manage all registered users on the platform</div>
+            </div>
+            <button class="inline-btn" onclick="showToast('Export ready!')">⬇ Export CSV</button>
+          </div>
+          <div class="dash-card">
+            <div style="display:flex;gap:1rem;margin-bottom:1.2rem;">
+              <input class="map-search" placeholder="Search users..." style="max-width:300px;">
+              <select style="padding:.6rem 1rem;border-radius:8px;border:1.5px solid rgba(74,158,107,.2);background:var(--cream);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;">
+                <option>All Roles</option><option>General User</option><option>Operator</option><option>Admin</option>
+              </select>
+            </div>
+            <table class="data-table" id="users-table">
+              <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Location</th><th>Joined</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody id="users-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- MODAL: Add Center -->
+<div class="modal-overlay" id="modal-add-center">
+  <div class="modal-box">
+    <div class="modal-title">➕ Add New Recycling Center</div>
+    <div class="form-group"><label>Center Name</label><input type="text" placeholder="e.g. EcoPoint Mandaluyong"></div>
+    <div class="form-group"><label>Address</label><input type="text" placeholder="Full address"></div>
+    <div class="form-group"><label>Contact Number</label><input type="text" placeholder="+63 ..."></div>
+    <div class="form-row">
+      <div class="form-group"><label>Opening Time</label><input type="time" value="08:00"></div>
+      <div class="form-group"><label>Closing Time</label><input type="time" value="17:00"></div>
+    </div>
+    <div class="form-group"><label>Status</label>
+      <select><option>Open</option><option>Limited Hours</option><option>Temporarily Closed</option></select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-outline-green" onclick="closeModal('modal-add-center')">Cancel</button>
+      <button class="btn btn-green" onclick="addCenter()">Add Center</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- TOAST -->
+<div class="toast" id="toast">✅ <span id="toast-msg">Action completed!</span></div>
+
+<script src="app.js"></script>
+</body>
+</html>
