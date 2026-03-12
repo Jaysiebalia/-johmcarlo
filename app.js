@@ -1,552 +1,637 @@
-/**
- * ============================================================
- *  RecycleHub Platform V1.0 — Application Logic
- *  app.js
- * ============================================================
- *  Sections:
- *    1.  Data (users_db, centers_db, materials_db, notifications_db)
- *    2.  Authentication (login, register, logout, role enforcement)
- *    3.  App Initialization (initApp)
- *    4.  Dashboard (KPIs, activity, impact bars)
- *    5.  Map & Centers (render, filter, pins, popup)
- *    6.  Material Guide (render, filter)
- *    7.  Notifications (render, read, mark all)
- *    8.  Profile (build, save)
- *    9.  Admin Panel (tabs, centers table, users table)
- *   10.  View Switching
- *   11.  Toast Notifications
- * ============================================================
- */
+// ============================================================
+//  RecycleHub Platform V1.0 — app.js
+//  Local Storage (No Firebase)
+// ============================================================
 
-// ══════════════════════════════════════
-// DATA
-// ══════════════════════════════════════
-let currentUser = null;
-let currentView = 'dashboard';
-let selectedCenterFilter = 'all';
-let selectedMatFilter = 'all';
+// ── LOCAL STORAGE HELPERS ────────────────────────────────────
+function lsGet(key)        { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } }
+function lsSet(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
 
-const users_db = [
-  {id:1,fname:'Maria',lname:'Santos',email:'user@recyclehub.com',pass:'password',role:'user',location:'Quezon City',joined:'Jan 2025',status:'active',avatar:'🧍'},
-  {id:2,fname:'Carlo',lname:'Reyes',email:'operator@recyclehub.com',pass:'password',role:'operator',location:'Mandaluyong',joined:'Dec 2024',status:'active',avatar:'🏭'},
-  {id:3,fname:'Ana',lname:'Lim',email:'admin@recyclehub.com',pass:'password',role:'admin',location:'Makati',joined:'Nov 2024',status:'active',avatar:'🔑'},
-  {id:4,fname:'Jose',lname:'Cruz',email:'jose@example.com',pass:'password',role:'user',location:'Pasig',joined:'Feb 2025',status:'active',avatar:'🧍'},
-  {id:5,fname:'Lea',lname:'Torres',email:'lea@example.com',pass:'password',role:'user',location:'Caloocan',joined:'Mar 2025',status:'inactive',avatar:'🧍'},
-];
+function generateId() {
+  return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+}
 
-const centers_db = [
-  {id:1,name:'GreenPoint QC',addr:'123 Eco St, Quezon City',materials:['Plastic','Paper','Metal'],status:'open',x:40,y:35},
-  {id:2,name:'EcoPoint Mandaluyong',addr:'88 Recycle Ave, Mandaluyong',materials:['E-Waste','Plastic','Batteries'],status:'open',x:55,y:55},
-  {id:3,name:'CleanHub Makati',addr:'45 Verde Blvd, Makati',materials:['Paper','Cardboard','Metal'],status:'limited',x:65,y:70},
-  {id:4,name:'RecycleMax Pasig',addr:'7 Green Lane, Pasig',materials:['Plastic','Glass','Metal'],status:'open',x:75,y:40},
-  {id:5,name:'BioCircle Caloocan',addr:'22 Circular Dr, Caloocan',materials:['Organic','Paper'],status:'closed',x:30,y:20},
-  {id:6,name:'MetroRecycle Taguig',addr:'10 BGC Loop, Taguig',materials:['E-Waste','Metal','Plastic'],status:'open',x:60,y:80},
-];
+function nowISO() { return new Date().toISOString(); }
 
-const materials_db = [
-  {icon:'🍶',name:'PET Plastic Bottles',cat:'Plastic',status:'recyclable',desc:'Clean PET (type 1) bottles. Remove caps and labels. Crush before drop-off if possible.'},
-  {icon:'📦',name:'Cardboard Boxes',cat:'Paper',status:'recyclable',desc:'Flatten all boxes. Remove tape, staples, and foam inserts. Keep dry.'},
-  {icon:'🥫',name:'Aluminum Cans',cat:'Metal',status:'recyclable',desc:'Rinse thoroughly. Any size aluminum cans are accepted at most centers.'},
-  {icon:'📰',name:'Newspaper & Magazines',cat:'Paper',status:'recyclable',desc:'Bundle with twine. Acceptable even if slightly damp. No wax-coated paper.'},
-  {icon:'💻',name:'Laptops & Computers',cat:'Electronics',status:'special',desc:'Requires certified e-waste center. Data should be wiped before drop-off.'},
-  {icon:'🔋',name:'Batteries (AA/AAA)',cat:'Electronics',status:'special',desc:'Never put in general recycling. Bring to designated e-waste collection points only.'},
-  {icon:'🍕',name:'Greasy Pizza Boxes',cat:'Paper',status:'not',desc:'Grease contamination makes recycling impossible. Compost the clean portions instead.'},
-  {icon:'🧴',name:'Shampoo Bottles (HDPE)',cat:'Plastic',status:'recyclable',desc:'HDPE (type 2) plastics. Rinse well. Most centers accept these.'},
-  {icon:'📱',name:'Mobile Phones',cat:'Electronics',status:'special',desc:'Drop off at manufacturer take-back programs or certified e-waste facilities.'},
-  {icon:'🥛',name:'Milk Cartons (Tetra Pak)',cat:'Paper',status:'special',desc:'Requires specific facility. Check your nearest center for acceptance.'},
-  {icon:'🍌',name:'Food Waste',cat:'Organic',status:'not',desc:'Not recyclable through standard centers. Use composting or organic waste bins.'},
-  {icon:'🪟',name:'Window Glass',cat:'Glass',status:'not',desc:'Different composition from bottle glass. Cannot be mixed with bottle recycling.'},
-  {icon:'📫',name:'Steel Food Cans',cat:'Metal',status:'recyclable',desc:'Rinse clean. Labels are okay to leave on. Both ends can stay on the can.'},
-  {icon:'👕',name:'Old Clothing',cat:'Textile',status:'special',desc:'Bring to textile recycling bins or donation centers, not standard recycling.'},
-  {icon:'🛢️',name:'Cooking Oil',cat:'Liquid',status:'special',desc:'Let cool and pour into sealed container. Some centers have specific oil collection.'},
-  {icon:'🍾',name:'Glass Bottles & Jars',cat:'Glass',status:'recyclable',desc:'Rinse clean. Remove metal lids (recycle separately). Labels are fine.'},
-];
+// ── SEED DEFAULT DATA ────────────────────────────────────────
+function seedDefaultData() {
+  if (!lsGet("rh_seeded")) {
+    lsSet("rh_users", []);
+    lsSet("rh_centers", [
+      { id: generateId(), name: "EcoPoint Quezon City",   address: "123 Commonwealth Ave, QC",   contact: "+63 912 000 0001", operatingHours: "08:00 – 17:00", status: "Open",          materials: ["Plastic","Paper","Metal"], isVerified: true,  createdAt: nowISO() },
+      { id: generateId(), name: "GreenHub Mandaluyong",   address: "456 Shaw Blvd, Mandaluyong", contact: "+63 912 000 0002", operatingHours: "09:00 – 18:00", status: "Open",          materials: ["Glass","Electronics"],     isVerified: true,  createdAt: nowISO() },
+      { id: generateId(), name: "RecyclePro Makati",      address: "789 Ayala Ave, Makati",      contact: "+63 912 000 0003", operatingHours: "08:00 – 16:00", status: "Limited Hours", materials: ["Metal","E-Waste"],         isVerified: false, createdAt: nowISO() },
+    ]);
+    lsSet("rh_materials", [
+      { id: generateId(), name: "Plastic Bottles (PET)", category: "Plastic",     isRecyclable: true,      icon: "🧴", description: "Clean, label-free PET bottles accepted at most centers.",       createdAt: nowISO() },
+      { id: generateId(), name: "Cardboard / Paper",     category: "Paper",       isRecyclable: true,      icon: "📦", description: "Flatten boxes; keep dry and free of grease.",                  createdAt: nowISO() },
+      { id: generateId(), name: "Aluminum Cans",         category: "Metal",       isRecyclable: true,      icon: "🥫", description: "Rinse cans before dropping off.",                              createdAt: nowISO() },
+      { id: generateId(), name: "Glass Bottles",         category: "Glass",       isRecyclable: true,      icon: "🍾", description: "Remove caps and rinse. Separate by color if possible.",        createdAt: nowISO() },
+      { id: generateId(), name: "Electronics / E-Waste", category: "Electronics", isRecyclable: "special", icon: "💻", description: "Requires certified e-waste drop-off center.",                 createdAt: nowISO() },
+      { id: generateId(), name: "Batteries",             category: "Hazardous",   isRecyclable: "special", icon: "🔋", description: "Never throw in general waste. Use designated hazardous bins.", createdAt: nowISO() },
+      { id: generateId(), name: "Styrofoam",             category: "Plastic",     isRecyclable: false,     icon: "📬", description: "Most curbside programs do not accept styrofoam.",              createdAt: nowISO() },
+      { id: generateId(), name: "Food Waste",            category: "Organic",     isRecyclable: false,     icon: "🍎", description: "Not recyclable; use compost bins instead.",                   createdAt: nowISO() },
+      { id: generateId(), name: "Steel / Metal Scrap",   category: "Metal",       isRecyclable: true,      icon: "🔩", description: "Scrap metal is highly valuable and widely accepted.",         createdAt: nowISO() },
+      { id: generateId(), name: "Textiles / Clothing",   category: "Textile",     isRecyclable: "special", icon: "👕", description: "Donate or use textile-specific recycling drives.",            createdAt: nowISO() },
+    ]);
+    lsSet("rh_notifications", []);
+    lsSet("rh_visits", []);
+    lsSet("rh_seeded", true);
+  }
+}
 
-const notifications_db = [
-  {id:1,icon:'📍',title:'New Center Near You',body:'GreenPoint QC is now accepting electronics. Located 0.4 km from your area.',time:'2 hours ago',unread:true},
-  {id:2,icon:'⏰',title:'Weekly Recycling Reminder',body:'Plastic collection day is tomorrow in your area. Check accepted materials before going.',time:'Yesterday',unread:true},
-  {id:3,icon:'🏆',title:'Community Milestone!',body:'Your neighborhood collectively recycled 2 tonnes this month. Incredible work!',time:'2 days ago',unread:true},
-  {id:4,icon:'📋',title:'Center Update: EcoPoint',body:'EcoPoint Mandaluyong confirmed your material drop-off. Contribution has been logged.',time:'3 days ago',unread:false},
-  {id:5,icon:'🌱',title:'Eco Tip of the Week',body:'Did you know? Aluminum can be recycled indefinitely without losing quality. Rinse cans before drop-off.',time:'1 week ago',unread:false},
-  {id:6,icon:'🔔',title:'Center Hours Changed',body:'CleanHub Makati updated their hours: now open Mon–Sat, 7AM–6PM.',time:'1 week ago',unread:false},
-];
+// ── APP STATE ────────────────────────────────────────────────
+let currentUser     = null;
+let currentUserData = null;
+let centersCache    = [];
+let materialsCache  = [];
 
-// ══════════════════════════════════════
-// AUTH
-// ══════════════════════════════════════
+// ── PAGE NAVIGATION ──────────────────────────────────────────
 function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 }
 
-function selectRole(el) {
-  document.querySelectorAll('.role-opt').forEach(o => o.classList.remove('selected'));
-  el.classList.add('selected');
+function switchView(view, el) {
+  document.querySelectorAll("[id^='view-']").forEach(v => { v.style.display = "none"; });
+  const target = document.getElementById("view-" + view);
+  if (target) target.style.display = "block";
+
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  if (el) el.classList.add("active");
+
+  document.getElementById("view-title").textContent =
+    view.charAt(0).toUpperCase() + view.slice(1).replace("-", " ");
+
+  if (view === "map")           renderMap();
+  if (view === "materials")     renderMaterials();
+  if (view === "notifications") renderNotifications();
+  if (view === "dashboard")     renderDashboard();
+  if (view === "profile")       renderProfile();
+  if (view === "users")         renderUsers();
+  if (view === "admin")         renderAdminCenters();
 }
 
+// ── AUTH HELPERS ─────────────────────────────────────────────
 function hintLoginRole() {
-  const email = document.getElementById('login-email').value.trim().toLowerCase();
-  const found = users_db.find(u => u.email.toLowerCase() === email);
-  const hintBox = document.getElementById('login-role-hint');
-  const hintText = document.getElementById('role-hint-text');
-  if (found) {
-    const roleLabel = found.role==='admin'?'Administrator':found.role==='operator'?'Recycling Center Operator':'General User';
-    hintText.textContent = roleLabel;
-    hintBox.style.display = 'block';
-  } else {
-    hintBox.style.display = 'none';
-  }
+  document.getElementById("login-role-hint").style.display = "none";
 }
 
-function doLogin() {
-  const email = document.getElementById('login-email').value.trim().toLowerCase();
-  const pass  = document.getElementById('login-pass').value.trim();
-  const errEl = document.getElementById('login-error');
-  // Find user by email + password
-  const user = users_db.find(u => u.email.toLowerCase() === email && u.pass === pass);
-  if (!user) {
-    // Check if email exists but wrong password
-    const emailExists = users_db.find(u => u.email.toLowerCase() === email);
-    if (emailExists) {
-      errEl.textContent = 'Incorrect password. Please try again.';
-    } else {
-      errEl.textContent = 'No account found with this email. Please register first.';
-    }
-    errEl.style.display = 'block';
-    return;
-  }
-  // Each account is locked to its registered role — no cross-role login allowed.
-  // General Users sign in as General User only.
-  // Operators sign in as Operator only.
-  // Admins sign in as Administrator only.
-  errEl.style.display = 'none';
-  currentUser = user;
-  initApp();
-  showPage('page-app');
-}
-
+// ── REGISTER ─────────────────────────────────────────────────
 function doRegister() {
-  const fname = document.getElementById('reg-fname').value.trim();
-  const lname = document.getElementById('reg-lname').value.trim();
-  const email = document.getElementById('reg-email').value.trim().toLowerCase();
-  const pass  = document.getElementById('reg-pass').value.trim();
-  const loc   = document.getElementById('reg-location').value.trim();
-  const role  = document.querySelector('.role-opt.selected').dataset.role;
-  const errEl = document.getElementById('reg-error');
-  if (!fname||!lname||!email||!pass||!loc) {
-    errEl.textContent = 'Please fill in all fields.';
-    errEl.style.display = 'block';
+  const fname    = document.getElementById("reg-fname").value.trim();
+  const lname    = document.getElementById("reg-lname").value.trim();
+  const email    = document.getElementById("reg-email").value.trim().toLowerCase();
+  const pass     = document.getElementById("reg-pass").value;
+  const location = document.getElementById("reg-location").value.trim();
+  const roleEl   = document.querySelector(".role-opt.selected");
+  const role     = roleEl ? roleEl.dataset.role : "user";
+  const errEl    = document.getElementById("reg-error");
+
+  errEl.style.display = "none";
+
+  if (!fname || !lname || !email || !pass || !location) {
+    errEl.textContent = "Please fill in all required fields.";
+    errEl.style.display = "block";
     return;
   }
-  const emailOK = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  if (!emailOK) {
-    errEl.textContent = 'Please enter a valid email address.';
-    errEl.style.display = 'block';
+  if (pass.length < 6) {
+    errEl.textContent = "Password must be at least 6 characters.";
+    errEl.style.display = "block";
     return;
   }
-  const exists = users_db.find(u => u.email.toLowerCase() === email);
-  if (exists) {
-    errEl.textContent = 'An account with this email already exists. Please sign in instead.';
-    errEl.style.display = 'block';
+
+  const users = lsGet("rh_users") || [];
+  if (users.find(u => u.email === email)) {
+    errEl.textContent = "This email is already registered.";
+    errEl.style.display = "block";
     return;
   }
-  errEl.style.display = 'none';
-  const newUser = {
-    id: users_db.length+1, fname, lname, email, pass, role,
-    location: loc, joined: 'Mar 2025', status: 'active',
-    avatar: role==='operator'?'🏭':role==='admin'?'🔑':'🧍'
-  };
-  users_db.push(newUser);
-  currentUser = newUser;
-  initApp();
-  showPage('page-app');
-  setTimeout(()=>showToast('Account created! Welcome to RecycleHub 🌱'),400);
+
+  users.push({
+    uid: generateId(), firstName: fname, lastName: lname,
+    name: `${fname} ${lname}`, email, password: pass,
+    role, location, bio: "", createdAt: nowISO(),
+    isActive: true, visitsCount: 0, notificationsCount: 0
+  });
+  lsSet("rh_users", users);
+
+  showToast("Account created! Please sign in 🌱");
+  showPage("page-login");
 }
 
+// ── LOGIN ─────────────────────────────────────────────────────
+function doLogin() {
+  const email  = document.getElementById("login-email").value.trim().toLowerCase();
+  const pass   = document.getElementById("login-pass").value;
+  const errEl  = document.getElementById("login-error");
+  errEl.style.display = "none";
+
+  if (!email || !pass) {
+    errEl.textContent = "Please enter your email and password.";
+    errEl.style.display = "block";
+    return;
+  }
+
+  const user = (lsGet("rh_users") || []).find(u => u.email === email && u.password === pass);
+
+  if (!user) {
+    errEl.textContent = "Invalid email or password.";
+    errEl.style.display = "block";
+    return;
+  }
+  if (!user.isActive) {
+    errEl.textContent = "Your account has been deactivated.";
+    errEl.style.display = "block";
+    return;
+  }
+
+  lsSet("rh_session", user.uid);
+  currentUser     = { uid: user.uid };
+  currentUserData = user;
+  bootApp();
+  showPage("page-app");
+  switchView("dashboard", document.querySelector(".nav-item"));
+}
+
+// ── LOGOUT ───────────────────────────────────────────────────
 function doLogout() {
-  currentUser = null;
-  showPage('page-login');
+  localStorage.removeItem("rh_session");
+  currentUser     = null;
+  currentUserData = null;
+  showPage("page-login");
+  showToast("Signed out successfully.");
 }
 
-// ══════════════════════════════════════
-// APP INIT
-// ══════════════════════════════════════
-function initApp() {
-  // Sidebar user info
-  document.getElementById('sb-name').textContent = currentUser.fname+' '+currentUser.lname;
-  document.getElementById('sb-role').textContent =
-    currentUser.role==='admin'?'Administrator':
-    currentUser.role==='operator'?'Center Operator':'General User';
-  document.getElementById('topbar-user').textContent = currentUser.fname+' '+currentUser.lname[0]+'.';
-
-  // Show/hide role-specific nav items
-  document.querySelectorAll('.operator-nav,.admin-nav,.operator-section,.admin-section').forEach(el=>{el.style.display='none';});
-  if (currentUser.role==='operator'||currentUser.role==='admin') {
-    document.querySelectorAll('.operator-nav').forEach(el=>el.style.display='flex');
-    document.querySelectorAll('.operator-section').forEach(el=>el.style.display='block');
-  }
-  if (currentUser.role==='admin') {
-    document.querySelectorAll('.admin-nav').forEach(el=>el.style.display='flex');
-    document.querySelectorAll('.admin-section').forEach(el=>el.style.display='block');
-  }
-
-  // Populate notification badge
-  const unread = notifications_db.filter(n=>n.unread).length;
-  document.getElementById('notif-badge').textContent = unread;
-
-  // Build dashboard
-  buildDashboard();
-  buildProfile();
-  buildMap();
-  buildMaterials();
-  buildNotifications();
-  buildAdminCenters();
-  buildUsersTable();
-
-  // Start on dashboard
-  switchView('dashboard', document.querySelector('.nav-item'));
-}
-
-// ══════════════════════════════════════
-// DASHBOARD
-// ══════════════════════════════════════
-function buildDashboard() {
-  const isAdmin = currentUser.role==='admin';
-  const isOp = currentUser.role==='operator';
-  const kpiGrid = document.getElementById('kpi-grid');
-  let kpis;
-  if (isAdmin) {
-    kpis = [
-      {icon:'👥',val:'1,284',label:'Total Users',change:'↑ 12%',up:true},
-      {icon:'🏢',val:'47',label:'Active Centers',change:'↑ 3 new',up:true},
-      {icon:'♻️',val:'8.2t',label:'Recycled This Month',change:'↑ 18%',up:true},
-    ];
-  } else if (isOp) {
-    kpis = [
-      {icon:'👀',val:'342',label:'Center Views (Month)',change:'↑ 8%',up:true},
-      {icon:'✅',val:'128',label:'Subscribers',change:'↑ 14',up:true},
-      {icon:'⭐',val:'4.8',label:'Average Rating',change:'↑ 0.2',up:true},
-    ];
+// ── RESTORE SESSION ON PAGE LOAD ─────────────────────────────
+function restoreSession() {
+  const uid  = lsGet("rh_session");
+  const user = uid && (lsGet("rh_users") || []).find(u => u.uid === uid);
+  if (user && user.isActive) {
+    currentUser     = { uid: user.uid };
+    currentUserData = user;
+    bootApp();
+    showPage("page-app");
+    switchView("dashboard", document.querySelector(".nav-item"));
   } else {
-    kpis = [
-      {icon:'♻️',val:'12',label:'Drop-offs Logged',change:'↑ 3 this week',up:true},
-      {icon:'📍',val:'5',label:'Centers Near You',change:'1 new this week',up:true},
-      {icon:'🏅',val:'Silver',label:'Eco Rank',change:'↑ from Bronze',up:true},
-    ];
+    localStorage.removeItem("rh_session");
+    showPage("page-login");
   }
-  kpiGrid.innerHTML = kpis.map(k=>`
+}
+
+// ── BOOT APP ─────────────────────────────────────────────────
+function bootApp() {
+  const u = currentUserData;
+  document.getElementById("sb-name").textContent     = u.name;
+  document.getElementById("sb-role").textContent     = roleLabel(u.role);
+  document.getElementById("topbar-user").textContent = u.firstName + " " + u.lastName.charAt(0) + ".";
+
+  const isOp    = u.role === "operator" || u.role === "admin";
+  const isAdmin = u.role === "admin";
+  document.querySelectorAll(".operator-nav, .operator-section").forEach(el => { el.style.display = isOp    ? "" : "none"; });
+  document.querySelectorAll(".admin-nav, .admin-section").forEach(el =>         { el.style.display = isAdmin ? "" : "none"; });
+
+  loadCenters();
+  loadMaterials();
+}
+
+// ── LOCAL: CENTERS ───────────────────────────────────────────
+function loadCenters()  { centersCache   = lsGet("rh_centers")   || []; }
+function loadMaterials(){ materialsCache = lsGet("rh_materials") || []; }
+
+function addCenter() {
+  const inputs  = document.querySelectorAll("#modal-add-center input[type='text'], #modal-add-center input:not([type])");
+  const times   = document.querySelectorAll("#modal-add-center input[type='time']");
+  const name    = inputs[0]?.value.trim();
+  const address = inputs[1]?.value.trim();
+  const contact = inputs[2]?.value.trim();
+  const open    = times[0]?.value;
+  const close   = times[1]?.value;
+  const status  = document.querySelector("#modal-add-center select").value;
+
+  if (!name || !address) { showToast("⚠️ Center name and address are required."); return; }
+
+  const centers = lsGet("rh_centers") || [];
+  centers.push({ id: generateId(), name, address, contact, operatingHours: `${open} – ${close}`, status, isVerified: false, materials: [], latitude: 14.6760, longitude: 121.0437, createdAt: nowISO(), createdBy: currentUser.uid });
+  lsSet("rh_centers", centers);
+  loadCenters();
+  closeModal("modal-add-center");
+  renderAdminCenters();
+  showToast("✅ Center added successfully!");
+}
+
+function deleteCenter(id) {
+  if (!confirm("Delete this recycling center?")) return;
+  lsSet("rh_centers", (lsGet("rh_centers") || []).filter(c => c.id !== id));
+  loadCenters();
+  renderAdminCenters();
+  showToast("🗑️ Center deleted.");
+}
+
+// ── LOCAL: NOTIFICATIONS ─────────────────────────────────────
+function loadNotifications() {
+  const notifs = (lsGet("rh_notifications") || [])
+    .filter(n => n.userId === currentUser.uid)
+    .sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt));
+
+  const unread = notifs.filter(n => !n.isRead).length;
+  const badge  = document.getElementById("notif-badge");
+  badge.textContent   = unread;
+  badge.style.display = unread > 0 ? "flex" : "none";
+  return notifs;
+}
+
+function markAllRead() {
+  const all = lsGet("rh_notifications") || [];
+  all.forEach(n => { if (n.userId === currentUser.uid) n.isRead = true; });
+  lsSet("rh_notifications", all);
+  renderNotifications();
+  showToast("All notifications marked as read.");
+}
+
+function markOneRead(id, el) {
+  const all = lsGet("rh_notifications") || [];
+  const n   = all.find(x => x.id === id);
+  if (n) { n.isRead = true; lsSet("rh_notifications", all); }
+  el.classList.remove("unread");
+  el.querySelector(".badge")?.remove();
+  loadNotifications();
+}
+
+// ── LOCAL: PROFILE ───────────────────────────────────────────
+function saveProfile() {
+  const updates = {
+    firstName: document.getElementById("pf-fname").value.trim(),
+    lastName:  document.getElementById("pf-lname").value.trim(),
+    email:     document.getElementById("pf-email").value.trim(),
+    location:  document.getElementById("pf-location").value.trim(),
+    bio:       document.getElementById("pf-bio").value.trim(),
+  };
+  updates.name = `${updates.firstName} ${updates.lastName}`;
+
+  const users = lsGet("rh_users") || [];
+  const idx   = users.findIndex(u => u.uid === currentUser.uid);
+  if (idx !== -1) { users[idx] = { ...users[idx], ...updates }; lsSet("rh_users", users); }
+  currentUserData = { ...currentUserData, ...updates };
+
+  document.getElementById("sb-name").textContent     = updates.name;
+  document.getElementById("topbar-user").textContent = updates.firstName + " " + updates.lastName.charAt(0) + ".";
+  showToast("✅ Profile saved!");
+}
+
+// ── LOCAL: ADMIN USERS ───────────────────────────────────────
+function loadAllUsers() { return lsGet("rh_users") || []; }
+
+function toggleUserStatus(uid, current) {
+  const users = lsGet("rh_users") || [];
+  const idx   = users.findIndex(u => u.uid === uid);
+  if (idx !== -1) { users[idx].isActive = !current; lsSet("rh_users", users); }
+  renderUsers();
+  showToast(`User ${!current ? "activated" : "deactivated"}.`);
+}
+
+// ── RENDER: DASHBOARD ────────────────────────────────────────
+function renderDashboard() {
+  const u       = currentUserData;
+  const isAdmin = u.role === "admin";
+  const notifs  = loadNotifications();
+  const kpiGrid = document.getElementById("kpi-grid");
+
+  const kpis = isAdmin ? [
+    { icon: "👥", val: loadAllUsers().length,                                       label: "Total Users",          change: "" },
+    { icon: "🏢", val: centersCache.length,                                         label: "Active Centers",       change: "" },
+    { icon: "♻️", val: materialsCache.filter(m => m.isRecyclable === true).length, label: "Recyclable Materials", change: "" },
+  ] : [
+    { icon: "📍", val: centersCache.length,                        label: "Centers Near You",     change: "↑ 2 new this week", up: true },
+    { icon: "♻️", val: materialsCache.length,                      label: "Material Guides",      change: "EPA-aligned",       up: true },
+    { icon: "🔔", val: notifs.filter(n => !n.isRead).length,       label: "Unread Notifications", change: "" },
+  ];
+
+  kpiGrid.innerHTML = kpis.map(k => `
     <div class="kpi-card">
       <div class="kpi-icon">${k.icon}</div>
       <div class="kpi-value">${k.val}</div>
       <div class="kpi-label">${k.label}</div>
-      <div class="kpi-change ${k.up?'up':'down'}">${k.change}</div>
-    </div>`).join('');
+      ${k.change ? `<div class="kpi-change ${k.up ? "up" : ""}">${k.change}</div>` : ""}
+    </div>
+  `).join("");
 
-  // Recent activity
-  const activities = [
-    {action:'Drop-off Logged',loc:'GreenPoint QC',date:'Mar 6',status:'<span class="badge badge-green">Confirmed</span>'},
-    {action:'Center Searched',loc:'EcoPoint Mandal.',date:'Mar 5',status:'<span class="badge badge-blue">Viewed</span>'},
-    {action:'Material Checked',loc:'Plastic Bottles',date:'Mar 4',status:'<span class="badge badge-green">Recyclable</span>'},
-    {action:'Notification Read',loc:'Weekly Reminder',date:'Mar 3',status:'<span class="badge badge-amber">Read</span>'},
-  ];
-  document.getElementById('recent-activity-body').innerHTML = activities.map(a=>`
-    <tr><td>${a.action}</td><td>${a.loc}</td><td>${a.date}</td><td>${a.status}</td></tr>`).join('');
+  document.getElementById("recent-activity-body").innerHTML = centersCache.slice(0, 5).map(c => `
+    <tr>
+      <td>Viewed Center</td><td>${c.name || "—"}</td>
+      <td>${formatDate(c.createdAt)}</td>
+      <td><span class="badge badge-green">Active</span></td>
+    </tr>
+  `).join("") || `<tr><td colspan="4" style="text-align:center;color:#aab8b0;padding:1.5rem;">No recent activity yet</td></tr>`;
 
-  // Dash notifications preview
-  document.getElementById('dash-notifs').innerHTML = notifications_db.slice(0,4).map(n=>`
-    <div style="display:flex;gap:.8rem;align-items:flex-start;padding:.7rem 0;border-bottom:1px solid rgba(74,158,107,.07);">
-      <span style="font-size:1.1rem;">${n.icon}</span>
+  document.getElementById("dash-notifs").innerHTML = notifs.slice(0, 4).map(n => `
+    <div class="notif-row ${n.isRead ? "" : "unread"}" style="margin-bottom:.6rem;">
+      <div class="notif-row-icon">${notifIcon(n.type)}</div>
       <div>
-        <div style="font-size:.85rem;font-weight:600;color:var(--forest);margin-bottom:.15rem;">${n.title}</div>
-        <div style="font-size:.78rem;color:#7a8b80;">${n.time}</div>
+        <div class="notif-row-title">${n.title}</div>
+        <div class="notif-row-body">${n.message}</div>
+        <div class="notif-row-time">${formatDate(n.sentAt)}</div>
       </div>
-    </div>`).join('');
+    </div>
+  `).join("") || `<div style="color:#aab8b0;font-size:.85rem;padding:.5rem;">No notifications yet</div>`;
 
-  // Impact bars
-  const bars = [
-    {label:'Plastic Recycled',pct:72},
-    {label:'Paper / Cardboard',pct:58},
-    {label:'Metals',pct:44},
-    {label:'E-Waste',pct:29},
-  ];
-  document.getElementById('impact-bars').innerHTML = bars.map(b=>`
+  document.getElementById("impact-bars").innerHTML = [
+    { label: "Plastic", pct: 82 }, { label: "Cardboard", pct: 67 },
+    { label: "Aluminum", pct: 45 }, { label: "E-Waste", pct: 30 },
+  ].map(b => `
     <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;">
-      <span style="font-size:.82rem;color:#556b5e;width:160px;">${b.label}</span>
+      <span style="font-size:.82rem;color:#556b5e;width:100px;">${b.label}</span>
       <div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:${b.pct}%"></div></div>
       <span style="font-size:.8rem;font-weight:700;color:var(--forest);width:35px;text-align:right;">${b.pct}%</span>
-    </div>`).join('');
+    </div>
+  `).join("");
 }
 
-// ══════════════════════════════════════
-// MAP / CENTERS
-// ══════════════════════════════════════
-function buildMap() {
-  renderCenterList(centers_db);
-  renderMapPins(centers_db);
-}
+// ── RENDER: MAP ──────────────────────────────────────────────
+function renderMap() {
+  const list = document.getElementById("center-list");
+  const pins = document.getElementById("map-pins");
 
-function renderCenterList(data) {
-  document.getElementById('center-list').innerHTML = data.length ? data.map(c=>`
-    <div class="center-card" id="cc-${c.id}" onclick="selectCenter(${c.id})">
-      <div class="center-name">${c.name}</div>
-      <div class="center-addr">📍 ${c.addr}</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
-        <span class="badge ${c.status==='open'?'badge-green':c.status==='limited'?'badge-amber':'badge-red'}">
-          ${c.status==='open'?'Open':c.status==='limited'?'Limited':'Closed'}
-        </span>
+  list.innerHTML = centersCache.map((c, i) => `
+    <div class="center-card" onclick="selectCenter('${c.id}', ${i})" id="cc-${c.id}">
+      <div class="center-name">${c.name || "Unnamed Center"}</div>
+      <div class="center-addr">📍 ${c.address || "No address"}</div>
+      <div class="center-tags">
+        ${(c.materials || []).map(m => `<span class="center-tag">${m}</span>`).join("")}
+        <span class="badge ${statusBadge(c.status)}" style="font-size:.65rem;">${c.status || "Open"}</span>
       </div>
-      <div class="center-tags">${c.materials.map(m=>`<span class="center-tag">${m}</span>`).join('')}</div>
-    </div>`).join('') :
-    '<div class="empty-state"><div class="empty-icon">🔍</div><p>No centers match your search.</p></div>';
+    </div>
+  `).join("") || `<div class="empty-state"><div class="empty-icon">📍</div><p>No centers found</p></div>`;
+
+  pins.innerHTML = centersCache.map((c, i) => {
+    const left = 20 + (i % 6) * 12;
+    const top  = 20 + Math.floor(i / 6) * 20;
+    return `<div class="map-pin pin-active" style="left:${left}%;top:${top}%;" onclick="showPinPopup('${c.id}', ${left}, ${top})"><div class="pin-dot"></div></div>`;
+  }).join("");
 }
 
-function renderMapPins(data) {
-  document.getElementById('map-pins').innerHTML = data.map(c=>`
-    <div class="map-pin ${c.status==='open'?'pin-active':c.status==='limited'?'pin-inactive':'pin-full'}"
-      style="left:${c.x}%;top:${c.y}%;"
-      onclick="showMapPopup(${c.id},${c.x},${c.y})">
-      <div class="pin-dot"></div>
-    </div>`).join('');
-}
-
-function showMapPopup(id,x,y) {
-  const c = centers_db.find(c=>c.id===id);
-  const popup = document.getElementById('map-popup');
-  popup.style.left = (x+3)+'%';
-  popup.style.top  = (y-25)+'%';
-  popup.innerHTML = `
+function showPinPopup(id, left, top) {
+  const c = centersCache.find(x => x.id === id);
+  if (!c) return;
+  const popup = document.getElementById("map-popup");
+  popup.className = "map-popup show";
+  popup.style.left = Math.min(left + 2, 65) + "%";
+  popup.style.top  = Math.max(top - 20, 5) + "%";
+  popup.innerHTML  = `
     <div class="popup-name">${c.name}</div>
-    <div class="popup-status">
-      <span class="badge ${c.status==='open'?'badge-green':c.status==='limited'?'badge-amber':'badge-red'}">
-        ${c.status==='open'?'Open':c.status==='limited'?'Limited Hours':'Closed'}
-      </span>
-    </div>
-    <div class="popup-materials" style="margin-top:.5rem;">
-      <strong style="font-size:.78rem;color:var(--forest);">Accepts:</strong><br>
-      ${c.materials.join(', ')}
-    </div>
-    <div style="margin-top:.5rem;font-size:.75rem;color:#7a8b80;">${c.addr}</div>
-    <button class="inline-btn" style="margin-top:.8rem;font-size:.75rem;padding:.4rem 1rem;" onclick="document.getElementById('map-popup').classList.remove('show')">✕ Close</button>`;
-  popup.classList.add('show');
+    <div class="popup-status"><span class="badge ${statusBadge(c.status)}">${c.status || "Open"}</span></div>
+    <div class="popup-materials">🕐 ${c.operatingHours || "Hours not listed"}</div>
+    <div class="popup-materials" style="margin-top:.3rem;">📞 ${c.contact || "No contact"}</div>
+    <button class="inline-btn" style="margin-top:.8rem;font-size:.75rem;padding:.4rem 1rem;" onclick="logVisit('${c.id}')">Log Visit ✓</button>
+  `;
 }
 
-function selectCenter(id) {
-  document.querySelectorAll('.center-card').forEach(c=>c.classList.remove('selected'));
-  document.getElementById('cc-'+id).classList.add('selected');
-  const c = centers_db.find(c=>c.id===id);
-  showMapPopup(id,c.x,c.y);
+function logVisit(centerId) {
+  const visits = lsGet("rh_visits") || [];
+  visits.push({ id: generateId(), userId: currentUser.uid, centerId, visitedAt: nowISO() });
+  lsSet("rh_visits", visits);
+
+  const users = lsGet("rh_users") || [];
+  const idx   = users.findIndex(u => u.uid === currentUser.uid);
+  if (idx !== -1) {
+    users[idx].visitsCount = (users[idx].visitsCount || 0) + 1;
+    lsSet("rh_users", users);
+    currentUserData.visitsCount = users[idx].visitsCount;
+  }
+  showToast("✅ Visit logged!");
+}
+
+function selectCenter(id, i) {
+  document.querySelectorAll(".center-card").forEach(c => c.classList.remove("selected"));
+  const el   = document.getElementById("cc-" + id);
+  if (el) el.classList.add("selected");
+  const c    = centersCache.find(x => x.id === id);
+  const left = 20 + (i % 6) * 12;
+  const top  = 20 + Math.floor(i / 6) * 20;
+  if (c) showPinPopup(id, left, top);
 }
 
 function filterCenters() {
-  const q = document.getElementById('center-search').value.toLowerCase();
-  const filtered = centers_db.filter(c =>
-    c.name.toLowerCase().includes(q) || c.addr.toLowerCase().includes(q) ||
-    (selectedCenterFilter==='all' || c.materials.some(m=>m.toLowerCase().includes(selectedCenterFilter)))
-  );
-  renderCenterList(filtered);
+  const q = document.getElementById("center-search").value.toLowerCase();
+  document.querySelectorAll(".center-card").forEach(card => {
+    card.style.display = card.textContent.toLowerCase().includes(q) ? "" : "none";
+  });
 }
 
-function filterChip(el,val) {
-  document.querySelectorAll('.filter-chips .chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
-  selectedCenterFilter = val;
-  filterCenters();
+function filterChip(el, type) {
+  document.querySelectorAll(".map-sidebar .chip").forEach(c => c.classList.remove("active"));
+  el.classList.add("active");
+  document.querySelectorAll(".center-card").forEach(card => {
+    card.style.display = (type === "all" || card.textContent.toLowerCase().includes(type)) ? "" : "none";
+  });
 }
 
-// ══════════════════════════════════════
-// MATERIALS
-// ══════════════════════════════════════
-function buildMaterials() { renderMaterials(materials_db); }
+// ── RENDER: MATERIALS ────────────────────────────────────────
+function renderMaterials(filter = "all", search = "") {
+  const grid = document.getElementById("materials-grid");
+  let list = materialsCache;
+  if (filter === "recyclable") list = list.filter(m => m.isRecyclable === true);
+  if (filter === "not")        list = list.filter(m => m.isRecyclable === false);
+  if (filter === "special")    list = list.filter(m => m.isRecyclable === "special");
+  if (search) list = list.filter(m => m.name.toLowerCase().includes(search) || (m.description || "").toLowerCase().includes(search));
 
-function renderMaterials(data) {
-  document.getElementById('materials-grid').innerHTML = data.map(m=>`
-    <div class="material-card">
-      <div class="material-icon">${m.icon}</div>
-      <div class="material-name">${m.name}</div>
-      <div style="font-size:.72rem;color:var(--leaf);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.3rem;">${m.cat}</div>
-      <p class="material-desc">${m.desc}</p>
-      <div class="material-status">
-        <div class="status-dot" style="background:${m.status==='recyclable'?'var(--leaf)':m.status==='special'?'var(--amber)':'var(--red)'}"></div>
-        <span style="color:${m.status==='recyclable'?'var(--leaf)':m.status==='special'?'var(--amber)':'var(--red)'}">
-          ${m.status==='recyclable'?'✅ Recyclable':m.status==='special'?'⚠️ Special Handling':'❌ Not Recyclable'}
-        </span>
-      </div>
-    </div>`).join('');
+  grid.innerHTML = list.map(m => {
+    const s = m.isRecyclable === true ? { color: "var(--leaf)", dot: "#4a9e6b", label: "Recyclable" }
+            : m.isRecyclable === "special" ? { color: "var(--amber)", dot: "#e8a74a", label: "Special Handling" }
+            : { color: "var(--red)", dot: "#e05555", label: "Not Recyclable" };
+    return `
+      <div class="material-card">
+        <div class="material-icon">${m.icon || "♻️"}</div>
+        <div class="material-name">${m.name}</div>
+        <div class="material-desc">${m.description || ""}</div>
+        <div class="material-status" style="color:${s.color};">
+          <div class="status-dot" style="background:${s.dot};"></div>${s.label}
+        </div>
+      </div>`;
+  }).join("") || `<div class="empty-state" style="grid-column:span 3;"><div class="empty-icon">🔍</div><p>No materials found</p></div>`;
 }
 
 function filterMaterials() {
-  const q = document.getElementById('material-search').value.toLowerCase();
-  const filtered = materials_db.filter(m =>
-    (m.name.toLowerCase().includes(q)||m.cat.toLowerCase().includes(q)||m.desc.toLowerCase().includes(q)) &&
-    (selectedMatFilter==='all'||
-     (selectedMatFilter==='recyclable'&&m.status==='recyclable')||
-     (selectedMatFilter==='not'&&m.status==='not')||
-     (selectedMatFilter==='special'&&m.status==='special'))
-  );
-  renderMaterials(filtered);
+  const q    = document.getElementById("material-search").value.toLowerCase();
+  const type = (document.querySelector("#view-materials .chip.active")?.textContent || "").replace(/[^a-z]/gi, "").toLowerCase();
+  renderMaterials(type === "recyclable" ? "recyclable" : type === "not" ? "not" : type === "special" ? "special" : "all", q);
 }
 
-function filterMatChip(el,val) {
-  document.querySelectorAll('#view-materials .chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
-  selectedMatFilter = val;
-  filterMaterials();
+function filterMatChip(el, type) {
+  document.querySelectorAll("#view-materials .chip").forEach(c => c.classList.remove("active"));
+  el.classList.add("active");
+  renderMaterials(type, document.getElementById("material-search").value.toLowerCase());
 }
 
-// ══════════════════════════════════════
-// NOTIFICATIONS
-// ══════════════════════════════════════
-function buildNotifications() {
-  document.getElementById('notif-list-view').innerHTML = notifications_db.map(n=>`
-    <div class="notif-row ${n.unread?'unread':''}" onclick="readNotif(${n.id},this)">
-      <div class="notif-row-icon">${n.icon}</div>
-      <div style="flex:1;">
-        <div class="notif-row-title">${n.title} ${n.unread?'<span class="badge badge-green" style="font-size:.65rem;">New</span>':''}</div>
-        <div class="notif-row-body">${n.body}</div>
-        <div class="notif-row-time">🕒 ${n.time}</div>
+// ── RENDER: NOTIFICATIONS ────────────────────────────────────
+function renderNotifications() {
+  const notifs = loadNotifications();
+  const list   = document.getElementById("notif-list-view");
+  list.innerHTML = notifs.map(n => `
+    <div class="notif-row ${n.isRead ? "" : "unread"}" onclick="markOneRead('${n.id}', this)">
+      <div class="notif-row-icon">${notifIcon(n.type)}</div>
+      <div style="flex:1">
+        <div class="notif-row-title">${n.title}</div>
+        <div class="notif-row-body">${n.message}</div>
+        <div class="notif-row-time">${formatDate(n.sentAt)}</div>
       </div>
-    </div>`).join('');
+      ${!n.isRead ? `<span class="badge badge-green" style="align-self:center;">New</span>` : ""}
+    </div>
+  `).join("") || `<div class="empty-state"><div class="empty-icon">🔔</div><p>No notifications yet</p></div>`;
 }
 
-function readNotif(id, el) {
-  const n = notifications_db.find(n=>n.id===id);
-  if (n) { n.unread=false; }
-  el.classList.remove('unread');
-  el.querySelector('.notif-row-title').innerHTML = el.querySelector('.notif-row-title').textContent.trim();
-  updateBadge();
+// ── RENDER: PROFILE ──────────────────────────────────────────
+function renderProfile() {
+  const u = currentUserData;
+  document.getElementById("profile-avatar").textContent = u.role === "admin" ? "🔑" : u.role === "operator" ? "🏭" : "🧍";
+  document.getElementById("profile-name").textContent   = u.name;
+  document.getElementById("profile-role").textContent   = roleLabel(u.role);
+  document.getElementById("pf-fname").value    = u.firstName || "";
+  document.getElementById("pf-lname").value    = u.lastName  || "";
+  document.getElementById("pf-email").value    = u.email     || "";
+  document.getElementById("pf-location").value = u.location  || "";
+  document.getElementById("pf-bio").value      = u.bio       || "";
+  document.getElementById("profile-stats").innerHTML = `
+    <div class="profile-stat"><div class="profile-stat-val">${u.visitsCount || 0}</div><div class="profile-stat-label">Centers Visited</div></div>
+    <div class="profile-stat"><div class="profile-stat-val">${u.notificationsCount || 0}</div><div class="profile-stat-label">Notifications</div></div>
+  `;
 }
 
-function markAllRead() {
-  notifications_db.forEach(n=>n.unread=false);
-  buildNotifications();
-  updateBadge();
-  showToast('All notifications marked as read');
-}
-
-function updateBadge() {
-  const count = notifications_db.filter(n=>n.unread).length;
-  const badge = document.getElementById('notif-badge');
-  badge.textContent = count;
-  badge.style.display = count>0?'flex':'none';
-}
-
-// ══════════════════════════════════════
-// PROFILE
-// ══════════════════════════════════════
-function buildProfile() {
-  document.getElementById('profile-avatar').textContent = currentUser.avatar;
-  document.getElementById('profile-name').textContent = currentUser.fname+' '+currentUser.lname;
-  document.getElementById('profile-role').textContent =
-    currentUser.role==='admin'?'Administrator':currentUser.role==='operator'?'Center Operator':'General User';
-  document.getElementById('pf-fname').value = currentUser.fname;
-  document.getElementById('pf-lname').value = currentUser.lname;
-  document.getElementById('pf-email').value = currentUser.email;
-  document.getElementById('pf-location').value = currentUser.location;
-  document.getElementById('profile-stats').innerHTML = `
-    <div class="profile-stat"><div class="profile-stat-val">12</div><div class="profile-stat-label">Drop-offs</div></div>
-    <div class="profile-stat"><div class="profile-stat-val">Silver</div><div class="profile-stat-label">Eco Rank</div></div>
-    <div class="profile-stat"><div class="profile-stat-val">5</div><div class="profile-stat-label">Centers Used</div></div>
-    <div class="profile-stat"><div class="profile-stat-val">2.4kg</div><div class="profile-stat-label">Recycled</div></div>`;
-}
-
-function saveProfile() {
-  currentUser.fname = document.getElementById('pf-fname').value;
-  currentUser.lname = document.getElementById('pf-lname').value;
-  currentUser.location = document.getElementById('pf-location').value;
-  document.getElementById('sb-name').textContent = currentUser.fname+' '+currentUser.lname;
-  document.getElementById('profile-name').textContent = currentUser.fname+' '+currentUser.lname;
-  document.getElementById('topbar-user').textContent = currentUser.fname+' '+currentUser.lname[0]+'.';
-  showToast('Profile updated successfully!');
-}
-
-// ══════════════════════════════════════
-// ADMIN
-// ══════════════════════════════════════
-function buildAdminCenters() {
-  document.getElementById('admin-centers-body').innerHTML = centers_db.map(c=>`
+// ── RENDER: ADMIN USERS ──────────────────────────────────────
+function renderUsers() {
+  if (currentUserData?.role !== "admin") return;
+  const tbody = document.getElementById("users-body");
+  tbody.innerHTML = loadAllUsers().map(u => `
     <tr>
-      <td><strong>${c.name}</strong></td>
-      <td>${c.addr}</td>
-      <td>${c.materials.join(', ')}</td>
-      <td><span class="badge ${c.status==='open'?'badge-green':c.status==='limited'?'badge-amber':'badge-red'}">
-        ${c.status==='open'?'Open':c.status==='limited'?'Limited':'Closed'}
-      </span></td>
+      <td>${u.name || "—"}</td><td>${u.email}</td>
+      <td><span class="badge badge-blue">${roleLabel(u.role)}</span></td>
+      <td>${u.location || "—"}</td><td>${formatDate(u.createdAt)}</td>
+      <td><span class="badge ${u.isActive ? "badge-green" : "badge-red"}">${u.isActive ? "Active" : "Inactive"}</span></td>
       <td>
-        <span style="cursor:pointer;font-size:.8rem;color:var(--leaf);font-weight:600;" onclick="showToast('Center editing coming soon!')">Edit</span>
-        &nbsp;·&nbsp;
-        <span style="cursor:pointer;font-size:.8rem;color:var(--red);font-weight:600;" onclick="showToast('Center removed!')">Remove</span>
+        <button class="inline-btn secondary" style="font-size:.75rem;padding:.3rem .8rem;" onclick="toggleUserStatus('${u.uid}', ${u.isActive})">
+          ${u.isActive ? "Deactivate" : "Activate"}
+        </button>
       </td>
-    </tr>`).join('');
+    </tr>
+  `).join("") || `<tr><td colspan="7" style="text-align:center;color:#aab8b0;">No users found</td></tr>`;
 }
 
-function buildUsersTable() {
-  document.getElementById('users-body').innerHTML = users_db.map(u=>`
+// ── RENDER: ADMIN CENTERS ─────────────────────────────────────
+function renderAdminCenters() {
+  if (currentUserData?.role !== "admin") return;
+  loadCenters();
+  const tbody = document.getElementById("admin-centers-body");
+  tbody.innerHTML = centersCache.map(c => `
     <tr>
-      <td><strong>${u.fname} ${u.lname}</strong></td>
-      <td>${u.email}</td>
-      <td><span class="badge ${u.role==='admin'?'badge-red':u.role==='operator'?'badge-blue':'badge-green'}">
-        ${u.role==='admin'?'Admin':u.role==='operator'?'Operator':'User'}
-      </span></td>
-      <td>${u.location}</td>
-      <td>${u.joined}</td>
-      <td><span class="badge ${u.status==='active'?'badge-green':'badge-amber'}">${u.status}</span></td>
+      <td>${c.name}</td><td>${c.address}</td>
+      <td>${(c.materials || []).join(", ") || "—"}</td>
+      <td><span class="badge ${statusBadge(c.status)}">${c.status || "Open"}</span></td>
       <td>
-        <span style="cursor:pointer;font-size:.8rem;color:var(--leaf);font-weight:600;" onclick="showToast('User updated!')">Edit</span>
-        &nbsp;·&nbsp;
-        <span style="cursor:pointer;font-size:.8rem;color:var(--red);font-weight:600;" onclick="showToast('User suspended!')">Suspend</span>
+        <button class="inline-btn secondary" style="font-size:.72rem;padding:.3rem .7rem;margin-right:.4rem;" onclick="showToast('Edit coming soon')">Edit</button>
+        <button class="inline-btn" style="font-size:.72rem;padding:.3rem .7rem;background:var(--red);color:white;" onclick="deleteCenter('${c.id}')">Delete</button>
       </td>
-    </tr>`).join('');
+    </tr>
+  `).join("") || `<tr><td colspan="5" style="text-align:center;color:#aab8b0;">No centers yet</td></tr>`;
 }
 
+// ── ADMIN TABS ───────────────────────────────────────────────
 function switchAdminTab(tab, el) {
-  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.admin-tab-content').forEach(t=>t.classList.remove('active'));
-  if(el) el.classList.add('active');
-  document.getElementById('admin-'+tab).classList.add('active');
+  document.querySelectorAll(".admin-tab-content").forEach(c => c.classList.remove("active"));
+  document.querySelectorAll(".admin-tab").forEach(t => t.classList.remove("active"));
+  document.getElementById("admin-" + tab).classList.add("active");
+  el.classList.add("active");
+  if (tab === "centers") renderAdminCenters();
 }
 
-function openAddCenter() {
-  document.getElementById('modal-add-center').classList.add('show');
-}
-function closeModal(id) {
-  document.getElementById(id).classList.remove('show');
-}
-function addCenter() {
-  closeModal('modal-add-center');
-  showToast('New center added to the platform!');
-  buildAdminCenters();
+// ── MODAL ─────────────────────────────────────────────────────
+function openAddCenter() { document.getElementById("modal-add-center").classList.add("show"); }
+function closeModal(id)  { document.getElementById(id).classList.remove("show"); }
+
+// ── ROLE PICKER ───────────────────────────────────────────────
+function selectRole(el) {
+  document.querySelectorAll(".role-opt").forEach(r => r.classList.remove("selected"));
+  el.classList.add("selected");
 }
 
-// ══════════════════════════════════════
-// VIEW SWITCHING
-// ══════════════════════════════════════
-const viewTitles = {
-  dashboard:'Dashboard',map:'Find Recycling Centers',
-  materials:'Material Guide',notifications:'Notifications',
-  profile:'My Profile',operator:'My Recycling Center',
-  admin:'Admin Panel',users:'User Management'
-};
-
-function switchView(view, navEl) {
-  // Hide all views
-  document.querySelectorAll('[id^="view-"]').forEach(v=>v.style.display='none');
-  // Show target
-  const target = document.getElementById('view-'+view);
-  if(target) target.style.display = view==='map'?'block':'block';
-  // Nav active
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  if(navEl) navEl.classList.add('active');
-  // Title
-  document.getElementById('view-title').textContent = viewTitles[view]||'';
-  currentView = view;
-}
-
-// ══════════════════════════════════════
-// TOAST
-// ══════════════════════════════════════
+// ── TOAST ─────────────────────────────────────────────────────
 function showToast(msg) {
-  const toast = document.getElementById('toast');
-  document.getElementById('toast-msg').textContent = msg;
-  toast.classList.add('show');
-  setTimeout(()=>toast.classList.remove('show'), 3000);
+  const t = document.getElementById("toast");
+  document.getElementById("toast-msg").textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3200);
 }
+
+// ── LOADING OVERLAY ───────────────────────────────────────────
+function showLoading(show) {
+  document.getElementById("loading-overlay").style.display = show ? "flex" : "none";
+}
+
+// ── HELPERS ───────────────────────────────────────────────────
+function roleLabel(role) {
+  return { user: "General User", operator: "Center Operator", admin: "Administrator" }[role] || role;
+}
+function statusBadge(status) {
+  if (!status || status === "Open") return "badge-green";
+  if (status === "Limited Hours")   return "badge-amber";
+  return "badge-red";
+}
+function notifIcon(type) {
+  return { reminder: "🔔", update: "📢", alert: "⚠️" }[type] || "📩";
+}
+function formatDate(ts) {
+  if (!ts) return "—";
+  const d = new Date(ts);
+  return isNaN(d) ? "—" : d.toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
+}
+
+// ── STUB FUNCTIONS ────────────────────────────────────────────
+function savePreferences()       { showToast("⚙️ Preferences saved!"); }
+function changePassword()        { showToast("🔐 Password update coming soon."); }
+function saveOperatorDetails()   { showToast("💾 Operator details saved!"); }
+function updateMaterials()       { showToast("♻️ Materials updated!"); }
+function sendSubscriberNotif()   { showToast("🔔 Notification sent to subscribers!"); }
+function sendAdminNotification() { showToast("🔔 Admin notification sent!"); }
+function exportReportPDF()       { showToast("⬇️ PDF export coming soon."); }
+function generateReport()        { showToast("📊 Report generation coming soon."); }
+function exportCSV()             { showToast("⬇️ CSV export coming soon."); }
+function saveEditUser()          { closeModal("modal-edit-user"); showToast("✅ User updated!"); }
+
+// ── GLOBAL EXPORTS ────────────────────────────────────────────
+window.showPage              = showPage;
+window.switchView            = switchView;
+window.hintLoginRole         = hintLoginRole;
+window.doLogin               = doLogin;
+window.doRegister            = doRegister;
+window.doLogout              = doLogout;
+window.selectRole            = selectRole;
+window.filterCenters         = filterCenters;
+window.filterChip            = filterChip;
+window.filterMaterials       = filterMaterials;
+window.filterMatChip         = filterMatChip;
+window.markAllRead           = markAllRead;
+window.markOneRead           = markOneRead;
+window.saveProfile           = saveProfile;
+window.openAddCenter         = openAddCenter;
+window.closeModal            = closeModal;
+window.addCenter             = addCenter;
+window.deleteCenter          = deleteCenter;
+window.toggleUserStatus      = toggleUserStatus;
+window.switchAdminTab        = switchAdminTab;
+window.showToast             = showToast;
+window.selectCenter          = selectCenter;
+window.showPinPopup          = showPinPopup;
+window.logVisit              = logVisit;
+window.savePreferences       = savePreferences;
+window.changePassword        = changePassword;
+window.saveOperatorDetails   = saveOperatorDetails;
+window.updateMaterials       = updateMaterials;
+window.sendSubscriberNotif   = sendSubscriberNotif;
+window.sendAdminNotification = sendAdminNotification;
+window.exportReportPDF       = exportReportPDF;
+window.generateReport        = generateReport;
+window.exportCSV             = exportCSV;
+window.saveEditUser          = saveEditUser;
+
+// ── INIT ─────────────────────────────────────────────────────
+seedDefaultData();
+restoreSession();
