@@ -9,9 +9,7 @@
 </head>
 <body>
 
-<!-- ════════════════════════════════════════
-     PAGE: LOGIN
-════════════════════════════════════════ -->
+<!-- ══════════════════════════ PAGE: LOGIN ══════════════════════════ -->
 <div class="page active" id="page-login">
   <div class="auth-wrap">
     <div class="auth-left">
@@ -21,40 +19,34 @@
         <p class="auth-tagline">Connecting communities with responsible waste management, one drop-off at a time.</p>
       </div>
       <div class="auth-features">
-        <div class="auth-feat">
-          <div class="auth-feat-icon">📍</div>
-          <div class="auth-feat-text"><strong>Find Nearby Centers</strong>Real-time geolocation to locate recycling drop-offs near you.</div>
-        </div>
-        <div class="auth-feat">
-          <div class="auth-feat-icon">♻️</div>
-          <div class="auth-feat-text"><strong>Material Guides</strong>EPA-aligned information on what can and can't be recycled.</div>
-        </div>
-        <div class="auth-feat">
-          <div class="auth-feat-icon">🔔</div>
-          <div class="auth-feat-text"><strong>Smart Reminders</strong>Get notified about recycling days and center updates.</div>
-        </div>
-        <div class="auth-feat">
-          <div class="auth-feat-icon">📊</div>
-          <div class="auth-feat-text"><strong>Analytics Dashboard</strong>Track participation and generate reports as an admin.</div>
-        </div>
+        <div class="auth-feat"><div class="auth-feat-icon">📍</div><div class="auth-feat-text"><strong>Find Nearby Centers</strong>Real-time geolocation to locate recycling drop-offs near you.</div></div>
+        <div class="auth-feat"><div class="auth-feat-icon">♻️</div><div class="auth-feat-text"><strong>Material Guides</strong>EPA-aligned information on what can and can't be recycled.</div></div>
+        <div class="auth-feat"><div class="auth-feat-icon">🔔</div><div class="auth-feat-text"><strong>Smart Reminders</strong>Get notified about recycling days and center updates.</div></div>
+        <div class="auth-feat"><div class="auth-feat-icon">📊</div><div class="auth-feat-text"><strong>Analytics Dashboard</strong>Track participation and generate reports as an admin.</div></div>
+      </div>
+      <!-- Demo account hints -->
+      <div style="margin-top:2rem;padding:1rem 1.2rem;background:rgba(255,255,255,.1);border-radius:10px;font-size:.78rem;color:rgba(255,255,255,.8);line-height:1.9;">
+        <div style="font-weight:700;color:#fff;margin-bottom:.3rem;">🔐 Demo Accounts</div>
+        🧍 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c4b1b7a1b684b6a1a7bda7a8a1acb1a6eaa7aba9">[email&#160;protected]</a> / password<br>
+        🏭 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="cba4bbaeb9aabfa4b98bb9aea8b2a8a7aea3bea9e5a8a4a6">[email&#160;protected]</a> / operator123<br>
+        🔑 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a4c5c0c9cdcae4d6c1c7ddc7c8c1ccd1c68ac7cbc9">[email&#160;protected]</a> / admin123
       </div>
     </div>
     <div class="auth-right">
       <div class="auth-form-box">
         <h2>Welcome back</h2>
         <p>Sign in to your RecycleHub account</p>
-        <div class="error-msg" id="login-error">Invalid email or password. Please try again.</div>
+        <div class="error-msg" id="login-error"></div>
         <div class="form-group">
           <label>Email Address</label>
-          <input type="email" id="login-email" placeholder="you@example.com" value="user@recyclehub.com" oninput="hintLoginRole()">
+          <input type="email" id="login-email" placeholder="you@example.com" oninput="hintLoginRole()">
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="login-pass" placeholder="••••••••" value="password">
+          <input type="password" id="login-pass" placeholder="••••••••">
         </div>
         <input type="hidden" id="login-role" value="">
         <div id="login-role-hint" style="display:none;margin-bottom:1rem;padding:.6rem 1rem;border-radius:8px;font-size:.82rem;font-weight:600;background:rgba(74,158,107,.08);border:1px solid rgba(74,158,107,.2);color:var(--leaf);">🔐 Signing in as: <span id="role-hint-text"></span></div>
-        <div style="font-size:.78rem;color:#aab8b0;margin-bottom:1rem;line-height:1.5;">Your account role is set when you register and cannot be changed at login.</div>
         <button class="btn btn-green" onclick="doLogin()">Sign In</button>
         <div class="auth-switch">Don't have an account? <a onclick="showPage('page-register')">Create one</a></div>
       </div>
@@ -62,9 +54,7 @@
   </div>
 </div>
 
-<!-- ════════════════════════════════════════
-     PAGE: REGISTER
-════════════════════════════════════════ -->
+<!-- ══════════════════════════ PAGE: REGISTER ══════════════════════════ -->
 <div class="page" id="page-register">
   <div class="auth-wrap">
     <div class="auth-left">
@@ -78,28 +68,19 @@
       <div class="auth-form-box">
         <h2>Create account</h2>
         <p>Join RecycleHub and start recycling smarter</p>
-        <div class="error-msg" id="reg-error">Please fill in all fields.</div>
+        <div class="error-msg" id="reg-error"></div>
         <label style="font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--forest);display:block;margin-bottom:.6rem;">I am a...</label>
         <div class="role-selector" id="reg-role-select">
-          <div class="role-opt selected" data-role="user" onclick="selectRole(this)">
-            <div class="role-icon">🧍</div>
-            <div class="role-name">General User</div>
-          </div>
-          <div class="role-opt" data-role="operator" onclick="selectRole(this)">
-            <div class="role-icon">🏭</div>
-            <div class="role-name">Operator</div>
-          </div>
-          <div class="role-opt" data-role="admin" onclick="selectRole(this)">
-            <div class="role-icon">🔑</div>
-            <div class="role-name">Admin</div>
-          </div>
+          <div class="role-opt selected" data-role="user" onclick="selectRole(this)"><div class="role-icon">🧍</div><div class="role-name">General User</div></div>
+          <div class="role-opt" data-role="operator" onclick="selectRole(this)"><div class="role-icon">🏭</div><div class="role-name">Operator</div></div>
+          <div class="role-opt" data-role="admin" onclick="selectRole(this)"><div class="role-icon">🔑</div><div class="role-name">Admin</div></div>
         </div>
         <div class="form-row">
           <div class="form-group"><label>First Name</label><input type="text" id="reg-fname" placeholder="Maria"></div>
           <div class="form-group"><label>Last Name</label><input type="text" id="reg-lname" placeholder="Santos"></div>
         </div>
         <div class="form-group"><label>Email Address</label><input type="email" id="reg-email" placeholder="you@example.com"></div>
-        <div class="form-group"><label>Password</label><input type="password" id="reg-pass" placeholder="Create a strong password"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="reg-pass" placeholder="Create a strong password (min 6 chars)"></div>
         <div class="form-group"><label>Location / City</label><input type="text" id="reg-location" placeholder="e.g. Quezon City, Metro Manila"></div>
         <button class="btn btn-green" onclick="doRegister()">Create Account</button>
         <div class="auth-switch">Already have an account? <a onclick="showPage('page-login')">Sign in</a></div>
@@ -108,11 +89,10 @@
   </div>
 </div>
 
-<!-- ════════════════════════════════════════
-     PAGE: MAIN APP
-════════════════════════════════════════ -->
+<!-- ══════════════════════════ PAGE: MAIN APP ══════════════════════════ -->
 <div class="page" id="page-app">
   <div class="app-layout">
+
     <!-- SIDEBAR -->
     <aside class="sidebar">
       <div class="sidebar-logo">Recycle<span>Hub</span></div>
@@ -122,50 +102,28 @@
       </div>
       <nav class="sidebar-nav">
         <div class="nav-section-label">Main</div>
-        <div class="nav-item active" onclick="switchView('dashboard',this)" data-roles="all">
-          <span class="nav-icon">🏠</span> Dashboard
-        </div>
-        <div class="nav-item" onclick="switchView('map',this)" data-roles="all">
-          <span class="nav-icon">📍</span> Find Centers
-        </div>
-        <div class="nav-item" onclick="switchView('materials',this)" data-roles="all">
-          <span class="nav-icon">♻️</span> Material Guide
-        </div>
-        <div class="nav-item" onclick="switchView('notifications',this)" data-roles="all">
-          <span class="nav-icon">🔔</span> Notifications
-        </div>
-
+        <div class="nav-item active" onclick="switchView('dashboard',this)"><span class="nav-icon">🏠</span> Dashboard</div>
+        <div class="nav-item" onclick="switchView('map',this)"><span class="nav-icon">📍</span> Find Centers</div>
+        <div class="nav-item" onclick="switchView('materials',this)"><span class="nav-icon">♻️</span> Material Guide</div>
+        <div class="nav-item" onclick="switchView('notifications',this)"><span class="nav-icon">🔔</span> Notifications</div>
         <div class="nav-section-label">Account</div>
-        <div class="nav-item" onclick="switchView('profile',this)" data-roles="all">
-          <span class="nav-icon">👤</span> My Profile
-        </div>
-
+        <div class="nav-item" onclick="switchView('profile',this)"><span class="nav-icon">👤</span> My Profile</div>
         <div class="nav-section-label operator-section admin-section" style="display:none">Manage</div>
-        <div class="nav-item operator-nav admin-nav" style="display:none" onclick="switchView('operator',this)">
-          <span class="nav-icon">🏢</span> My Center
-        </div>
-        <div class="nav-item admin-nav" style="display:none" onclick="switchView('admin',this)">
-          <span class="nav-icon">⚙️</span> Admin Panel
-        </div>
-        <div class="nav-item admin-nav" style="display:none" onclick="switchView('users',this)">
-          <span class="nav-icon">👥</span> Manage Users
-        </div>
+        <div class="nav-item operator-nav admin-nav" style="display:none" onclick="switchView('operator',this)"><span class="nav-icon">🏢</span> My Center</div>
+        <div class="nav-item admin-nav" style="display:none" onclick="switchView('admin',this)"><span class="nav-icon">⚙️</span> Admin Panel</div>
+        <div class="nav-item admin-nav" style="display:none" onclick="switchView('users',this)"><span class="nav-icon">👥</span> Manage Users</div>
       </nav>
       <div class="sidebar-bottom">
-        <div class="logout-btn" onclick="doLogout()">
-          <span>🚪</span> Sign Out
-        </div>
+        <div class="logout-btn" onclick="doLogout()"><span>🚪</span> Sign Out</div>
       </div>
     </aside>
 
-    <!-- MAIN -->
+    <!-- MAIN CONTENT -->
     <main class="main-content">
       <div class="topbar">
         <div class="topbar-title" id="view-title">Dashboard</div>
         <div class="topbar-right">
-          <div class="notif-bell" onclick="switchView('notifications',null)">
-            🔔<span class="notif-badge" id="notif-badge">3</span>
-          </div>
+          <div class="notif-bell" onclick="switchView('notifications',null)">🔔<span class="notif-badge" id="notif-badge">3</span></div>
           <span style="font-size:.85rem;color:#7a8b80;" id="topbar-user">Maria S.</span>
         </div>
       </div>
@@ -192,7 +150,7 @@
         </div>
       </div>
 
-      <!-- ── VIEW: MAP ── -->
+      <!-- ── VIEW: FIND CENTERS / MAP ── -->
       <div id="view-map" style="display:none;">
         <div class="map-layout">
           <div class="map-sidebar">
@@ -211,7 +169,6 @@
           <div class="map-canvas">
             <div class="map-visual" id="map-visual">
               <div class="map-grid"></div>
-              <!-- roads -->
               <div class="map-road-h" style="top:30%"></div>
               <div class="map-road-h" style="top:55%"></div>
               <div class="map-road-h" style="top:75%"></div>
@@ -228,7 +185,7 @@
         </div>
       </div>
 
-      <!-- ── VIEW: MATERIALS ── -->
+      <!-- ── VIEW: MATERIAL GUIDE ── -->
       <div id="view-materials" style="display:none;">
         <div class="materials-header">
           <input class="materials-search" id="material-search" placeholder="🔍  Search materials (e.g. plastic bottle, cardboard)..." oninput="filterMaterials()">
@@ -250,7 +207,7 @@
               <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:var(--forest);">Notifications</div>
               <div style="font-size:.85rem;color:#7a8b80;margin-top:.2rem;">Stay up to date with recycling activities</div>
             </div>
-            <button class="inline-btn secondary" onclick="markAllRead()">Mark all read</button>
+            <button class="inline-btn secondary" onclick="markAllRead()">✅ Mark all read</button>
           </div>
           <div class="notif-list-view" id="notif-list-view"></div>
         </div>
@@ -268,17 +225,19 @@
             </div>
           </div>
           <div>
+            <!-- Personal Info -->
             <div class="profile-form-card">
               <div class="section-title">Personal Information</div>
               <div class="form-row">
                 <div class="form-group"><label>First Name</label><input id="pf-fname" type="text"></div>
                 <div class="form-group"><label>Last Name</label><input id="pf-lname" type="text"></div>
               </div>
-              <div class="form-group"><label>Email</label><input id="pf-email" type="email"></div>
+              <div class="form-group"><label>Email</label><input id="pf-email" type="email" readonly style="opacity:.6;cursor:not-allowed;"></div>
               <div class="form-group"><label>Location</label><input id="pf-location" type="text"></div>
               <div class="form-group"><label>Bio</label><textarea id="pf-bio" placeholder="Tell the community about your recycling journey..."></textarea></div>
-              <button class="inline-btn" onclick="saveProfile()">Save Changes</button>
+              <button class="inline-btn" onclick="saveProfile()">💾 Save Changes</button>
             </div>
+            <!-- Notification Prefs -->
             <div class="profile-form-card" style="margin-top:1.2rem;">
               <div class="section-title">Notification Preferences</div>
               <div class="checkbox-group">
@@ -287,24 +246,26 @@
                 <label class="checkbox-item"><input type="checkbox"> SMS alerts for center updates</label>
                 <label class="checkbox-item"><input type="checkbox" checked> Community milestone alerts</label>
               </div>
-              <br><button class="inline-btn" onclick="showToast('Preferences saved!')">Save Preferences</button>
+              <br><button class="inline-btn" onclick="savePreferences()">💾 Save Preferences</button>
             </div>
+            <!-- Change Password -->
             <div class="profile-form-card" style="margin-top:1.2rem;">
               <div class="section-title">Change Password</div>
-              <div class="form-group"><label>Current Password</label><input type="password" placeholder="••••••••"></div>
+              <div class="form-group"><label>Current Password</label><input type="password" id="pf-curr-pass" placeholder="••••••••"></div>
               <div class="form-row">
-                <div class="form-group"><label>New Password</label><input type="password" placeholder="••••••••"></div>
-                <div class="form-group"><label>Confirm Password</label><input type="password" placeholder="••••••••"></div>
+                <div class="form-group"><label>New Password</label><input type="password" id="pf-new-pass" placeholder="Min. 6 characters"></div>
+                <div class="form-group"><label>Confirm Password</label><input type="password" id="pf-conf-pass" placeholder="••••••••"></div>
               </div>
-              <button class="inline-btn" onclick="showToast('Password updated!')">Update Password</button>
+              <button class="inline-btn" onclick="changePassword()">🔐 Update Password</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ── VIEW: OPERATOR ── -->
+      <!-- ── VIEW: OPERATOR — MY CENTER ── -->
       <div id="view-operator" style="display:none;">
         <div class="operator-grid">
+          <!-- Center Details -->
           <div class="op-card" style="grid-column:span 2;">
             <div class="op-card-title">🏢 My Recycling Center Details</div>
             <div class="form-row">
@@ -327,8 +288,9 @@
                 <label class="checkbox-item"><input type="checkbox"> Sun</label>
               </div>
             </div>
-            <button class="inline-btn" onclick="showToast('Center details updated successfully!')">Save Details</button>
+            <button class="inline-btn" onclick="saveOperatorDetails()">💾 Save Details</button>
           </div>
+          <!-- Accepted Materials -->
           <div class="op-card">
             <div class="op-card-title">♻️ Accepted Materials</div>
             <div class="checkbox-group" id="op-materials">
@@ -342,38 +304,23 @@
               <label class="checkbox-item"><input type="checkbox"> Textiles</label>
               <label class="checkbox-item"><input type="checkbox"> Cooking Oil</label>
             </div>
-            <br><button class="inline-btn" onclick="showToast('Accepted materials updated!')">Update Materials</button>
+            <br><button class="inline-btn" onclick="updateMaterials()">♻️ Update Materials</button>
           </div>
+          <!-- Center Performance + Send Notif -->
           <div class="op-card">
             <div class="op-card-title">📊 Center Performance</div>
             <div class="chart-bar-wrap">
-              <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;">
-                <span style="font-size:.82rem;color:#556b5e;width:130px;">Visits This Month</span>
-                <div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:74%"></div></div>
-                <span style="font-size:.8rem;font-weight:700;color:var(--forest);width:35px;text-align:right;">74%</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;">
-                <span style="font-size:.82rem;color:#556b5e;width:130px;">5-Star Ratings</span>
-                <div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:89%"></div></div>
-                <span style="font-size:.8rem;font-weight:700;color:var(--forest);width:35px;text-align:right;">89%</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;">
-                <span style="font-size:.82rem;color:#556b5e;width:130px;">Materials Accepted</span>
-                <div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:60%"></div></div>
-                <span style="font-size:.8rem;font-weight:700;color:var(--forest);width:35px;text-align:right;">60%</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:.8rem;">
-                <span style="font-size:.82rem;color:#556b5e;width:130px;">Repeat Visitors</span>
-                <div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:55%"></div></div>
-                <span style="font-size:.8rem;font-weight:700;color:var(--forest);width:35px;text-align:right;">55%</span>
-              </div>
+              <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;"><span style="font-size:.82rem;color:#556b5e;width:130px;">Visits This Month</span><div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:74%"></div></div><span style="font-size:.8rem;font-weight:700;color:var(--forest);width:35px;text-align:right;">74%</span></div>
+              <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;"><span style="font-size:.82rem;color:#556b5e;width:130px;">5-Star Ratings</span><div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:89%"></div></div><span style="font-size:.8rem;font-weight:700;color:var(--forest);width:35px;text-align:right;">89%</span></div>
+              <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;"><span style="font-size:.82rem;color:#556b5e;width:130px;">Materials Accepted</span><div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:60%"></div></div><span style="font-size:.8rem;font-weight:700;color:var(--forest);width:35px;text-align:right;">60%</span></div>
+              <div style="display:flex;align-items:center;gap:.8rem;"><span style="font-size:.82rem;color:#556b5e;width:130px;">Repeat Visitors</span><div class="chart-bar-track" style="flex:1"><div class="chart-bar-fill" style="width:55%"></div></div><span style="font-size:.8rem;font-weight:700;color:var(--forest);width:35px;text-align:right;">55%</span></div>
             </div>
             <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid rgba(74,158,107,.1);">
-              <div style="font-size:.85rem;color:#556b5e;">Send Update to Subscribers</div>
-              <div class="form-group" style="margin-top:.6rem;margin-bottom:.6rem;">
-                <textarea placeholder="e.g. We are now accepting glass bottles starting Monday..." style="width:100%;padding:.7rem;border-radius:8px;border:1.5px solid rgba(74,158,107,.2);background:var(--cream);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;resize:vertical;min-height:70px;"></textarea>
+              <div style="font-size:.85rem;color:#556b5e;font-weight:600;margin-bottom:.5rem;">📣 Send Update to Subscribers</div>
+              <div class="form-group" style="margin-bottom:.6rem;">
+                <textarea id="op-notif-msg" placeholder="e.g. We are now accepting glass bottles starting Monday..." style="width:100%;padding:.7rem;border-radius:8px;border:1.5px solid rgba(74,158,107,.2);background:var(--cream);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;resize:vertical;min-height:70px;"></textarea>
               </div>
-              <button class="inline-btn" onclick="showToast('Notification sent to 128 subscribers!')">Send Notification</button>
+              <button class="inline-btn" onclick="sendSubscriberNotif()">🔔 Send Notification</button>
             </div>
           </div>
         </div>
@@ -387,10 +334,12 @@
           <div class="admin-tab" onclick="switchAdminTab('centers',this)">Centers</div>
           <div class="admin-tab" onclick="switchAdminTab('notifications',this)">Notifications</div>
         </div>
+
+        <!-- OVERVIEW -->
         <div id="admin-overview" class="admin-tab-content active">
           <div class="dash-grid" style="margin-bottom:1.5rem;">
-            <div class="kpi-card"><div class="kpi-icon">👥</div><div class="kpi-value">1,284</div><div class="kpi-label">Total Registered Users</div><div class="kpi-change up">↑ 12% this month</div></div>
-            <div class="kpi-card"><div class="kpi-icon">🏢</div><div class="kpi-value">47</div><div class="kpi-label">Active Recycling Centers</div><div class="kpi-change up">↑ 3 new this week</div></div>
+            <div class="kpi-card"><div class="kpi-icon">👥</div><div class="kpi-value" id="admin-kpi-users">—</div><div class="kpi-label">Total Registered Users</div><div class="kpi-change up">↑ 12% this month</div></div>
+            <div class="kpi-card"><div class="kpi-icon">🏢</div><div class="kpi-value" id="admin-kpi-centers">—</div><div class="kpi-label">Active Recycling Centers</div><div class="kpi-change up">↑ 3 new this week</div></div>
             <div class="kpi-card"><div class="kpi-icon">♻️</div><div class="kpi-value">8.2t</div><div class="kpi-label">Materials Recycled (Month)</div><div class="kpi-change up">↑ 18% vs last month</div></div>
           </div>
           <div class="dash-row">
@@ -407,34 +356,27 @@
             <div class="dash-card">
               <div class="dash-card-title">⚡ System Status</div>
               <div style="display:flex;flex-direction:column;gap:.8rem;">
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem;background:rgba(74,158,107,.05);border-radius:8px;">
-                  <span style="font-size:.85rem;color:var(--forest);">🌐 Geolocation API</span><span class="badge badge-green">Online</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem;background:rgba(74,158,107,.05);border-radius:8px;">
-                  <span style="font-size:.85rem;color:var(--forest);">🔔 Notification Service</span><span class="badge badge-green">Online</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem;background:rgba(74,158,107,.05);border-radius:8px;">
-                  <span style="font-size:.85rem;color:var(--forest);">🗄️ Database</span><span class="badge badge-green">Healthy</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem;background:rgba(232,167,74,.05);border-radius:8px;">
-                  <span style="font-size:.85rem;color:var(--forest);">☁️ Cloud Storage</span><span class="badge badge-amber">~85% Used</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem;background:rgba(74,158,107,.05);border-radius:8px;">
-                  <span style="font-size:.85rem;color:var(--forest);">🔐 Auth Service</span><span class="badge badge-green">Secure</span>
-                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem;background:rgba(74,158,107,.05);border-radius:8px;"><span style="font-size:.85rem;color:var(--forest);">🌐 Geolocation API</span><span class="badge badge-green">Online</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem;background:rgba(74,158,107,.05);border-radius:8px;"><span style="font-size:.85rem;color:var(--forest);">🔔 Notification Service</span><span class="badge badge-green">Online</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem;background:rgba(74,158,107,.05);border-radius:8px;"><span style="font-size:.85rem;color:var(--forest);">🗄️ Database</span><span class="badge badge-green">Healthy</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem;background:rgba(232,167,74,.05);border-radius:8px;"><span style="font-size:.85rem;color:var(--forest);">☁️ Cloud Storage</span><span class="badge badge-amber">~85% Used</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem;background:rgba(74,158,107,.05);border-radius:8px;"><span style="font-size:.85rem;color:var(--forest);">🔐 Auth Service</span><span class="badge badge-green">Secure</span></div>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- REPORTS -->
         <div id="admin-reports" class="admin-tab-content">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
             <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--forest);">Generate Reports</div>
-            <button class="inline-btn" onclick="showToast('Report exported as PDF!')">⬇ Export PDF</button>
+            <button class="inline-btn" onclick="exportReportPDF()">⬇ Export PDF</button>
           </div>
-          <div class="form-row" style="margin-bottom:1.5rem;max-width:500px;">
-            <div class="form-group"><label>From Date</label><input type="date" value="2025-01-01"></div>
-            <div class="form-group"><label>To Date</label><input type="date" value="2025-03-07"></div>
+          <div class="form-row" style="margin-bottom:.8rem;max-width:500px;">
+            <div class="form-group"><label>From Date</label><input type="date" id="report-from" value="2025-01-01"></div>
+            <div class="form-group"><label>To Date</label><input type="date" id="report-to" value="2025-03-07"></div>
           </div>
+          <button class="inline-btn" style="margin-bottom:1.5rem;" onclick="generateReport()">📊 Generate Report</button>
           <div class="dash-grid" style="margin-bottom:1.5rem;">
             <div class="kpi-card"><div class="kpi-icon">🧾</div><div class="kpi-value">3,210</div><div class="kpi-label">Total Drop-offs Logged</div></div>
             <div class="kpi-card"><div class="kpi-icon">🏆</div><div class="kpi-value">Top: Plastic</div><div class="kpi-label">Most Recycled Material</div></div>
@@ -451,6 +393,8 @@
             </div>
           </div>
         </div>
+
+        <!-- CENTERS -->
         <div id="admin-centers" class="admin-tab-content">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
             <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--forest);">All Recycling Centers</div>
@@ -463,30 +407,33 @@
             </table>
           </div>
         </div>
+
+        <!-- NOTIFICATIONS -->
         <div id="admin-notifications" class="admin-tab-content">
           <div style="max-width:600px;">
             <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--forest);margin-bottom:1.5rem;">Send Platform Notification</div>
             <div class="op-card">
-              <div class="form-group"><label>Notification Title</label><input type="text" placeholder="e.g. New Center Available in Your Area"></div>
-              <div class="form-group"><label>Message</label><textarea placeholder="Write your notification message here..."></textarea></div>
+              <div class="form-group"><label>Notification Title</label><input type="text" id="admin-notif-title" placeholder="e.g. New Center Available in Your Area"></div>
+              <div class="form-group"><label>Message</label><textarea id="admin-notif-msg" placeholder="Write your notification message here..."></textarea></div>
               <div class="form-group"><label>Send To</label>
-                <select><option>All Users</option><option>General Users Only</option><option>Operators Only</option><option>Specific City</option></select>
+                <select id="admin-notif-target">
+                  <option value="All Users">All Users</option>
+                  <option value="General Users Only">General Users Only</option>
+                  <option value="Operators Only">Operators Only</option>
+                  <option value="Specific City">Specific City</option>
+                </select>
               </div>
               <div class="form-group"><label>Schedule</label>
                 <select><option>Send Now</option><option>Schedule for Later</option></select>
               </div>
-              <button class="inline-btn" onclick="showToast('Notification sent to 1,284 users!')">Send Notification</button>
+              <button class="inline-btn" onclick="sendAdminNotification()">🔔 Send Notification</button>
             </div>
             <div style="margin-top:1.5rem;">
               <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--forest);margin-bottom:1rem;">Sent Notifications Log</div>
               <div class="dash-card">
                 <table class="data-table">
                   <thead><tr><th>Title</th><th>Sent To</th><th>Date</th><th>Open Rate</th></tr></thead>
-                  <tbody>
-                    <tr><td>New E-Waste Center Open</td><td>All Users</td><td>Mar 5, 2025</td><td><span class="badge badge-green">94%</span></td></tr>
-                    <tr><td>Weekly Recycling Reminder</td><td>All Users</td><td>Mar 3, 2025</td><td><span class="badge badge-green">88%</span></td></tr>
-                    <tr><td>Partner Update: EcoPoint</td><td>QC Users</td><td>Feb 28, 2025</td><td><span class="badge badge-amber">71%</span></td></tr>
-                  </tbody>
+                  <tbody id="sent-notifs-body"></tbody>
                 </table>
               </div>
             </div>
@@ -502,13 +449,16 @@
               <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:var(--forest);">User Management</div>
               <div style="font-size:.85rem;color:#7a8b80;margin-top:.2rem;">Manage all registered users on the platform</div>
             </div>
-            <button class="inline-btn" onclick="showToast('Export ready!')">⬇ Export CSV</button>
+            <button class="inline-btn" onclick="exportCSV()">⬇ Export CSV</button>
           </div>
           <div class="dash-card">
             <div style="display:flex;gap:1rem;margin-bottom:1.2rem;">
-              <input class="map-search" placeholder="Search users..." style="max-width:300px;">
-              <select style="padding:.6rem 1rem;border-radius:8px;border:1.5px solid rgba(74,158,107,.2);background:var(--cream);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;">
-                <option>All Roles</option><option>General User</option><option>Operator</option><option>Admin</option>
+              <input id="user-search-input" class="map-search" placeholder="🔍 Search users by name or email..." style="max-width:320px;" oninput="searchUsers()">
+              <select id="user-role-filter" onchange="filterUsersByRole()" style="padding:.6rem 1rem;border-radius:8px;border:1.5px solid rgba(74,158,107,.2);background:var(--cream);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;">
+                <option value="all">All Roles</option>
+                <option value="user">General User</option>
+                <option value="operator">Operator</option>
+                <option value="admin">Admin</option>
               </select>
             </div>
             <table class="data-table" id="users-table">
@@ -523,30 +473,92 @@
   </div>
 </div>
 
-<!-- MODAL: Add Center -->
+<!-- ══════════ MODAL: Add / Edit Center ══════════ -->
 <div class="modal-overlay" id="modal-add-center">
   <div class="modal-box">
-    <div class="modal-title">➕ Add New Recycling Center</div>
-    <div class="form-group"><label>Center Name</label><input type="text" placeholder="e.g. EcoPoint Mandaluyong"></div>
-    <div class="form-group"><label>Address</label><input type="text" placeholder="Full address"></div>
-    <div class="form-group"><label>Contact Number</label><input type="text" placeholder="+63 ..."></div>
+    <div class="modal-title" id="modal-center-title">➕ Add New Recycling Center</div>
+    <div class="form-group"><label>Center Name</label><input type="text" id="nc-name" placeholder="e.g. EcoPoint Mandaluyong"></div>
+    <div class="form-group"><label>Address</label><input type="text" id="nc-addr" placeholder="Full address"></div>
+    <div class="form-group"><label>Contact Number</label><input type="text" id="nc-contact" placeholder="+63 ..."></div>
     <div class="form-row">
-      <div class="form-group"><label>Opening Time</label><input type="time" value="08:00"></div>
-      <div class="form-group"><label>Closing Time</label><input type="time" value="17:00"></div>
+      <div class="form-group"><label>Opening Time</label><input type="time" id="nc-open" value="08:00"></div>
+      <div class="form-group"><label>Closing Time</label><input type="time" id="nc-close" value="17:00"></div>
     </div>
     <div class="form-group"><label>Status</label>
-      <select><option>Open</option><option>Limited Hours</option><option>Temporarily Closed</option></select>
+      <select id="nc-status"><option value="open">Open</option><option value="limited">Limited Hours</option><option value="closed">Temporarily Closed</option></select>
     </div>
     <div class="modal-btns">
       <button class="btn btn-outline-green" onclick="closeModal('modal-add-center')">Cancel</button>
-      <button class="btn btn-green" onclick="addCenter()">Add Center</button>
+      <button class="btn btn-green" id="modal-center-save-btn" onclick="addCenter()">Add Center</button>
     </div>
   </div>
 </div>
 
+<!-- ══════════ MODAL: Edit User ══════════ -->
+<div class="modal-overlay" id="modal-edit-user">
+  <div class="modal-box">
+    <div class="modal-title">✏️ Edit User</div>
+    <input type="hidden" id="eu-uid">
+    <div class="form-row">
+      <div class="form-group"><label>First Name</label><input type="text" id="eu-fname"></div>
+      <div class="form-group"><label>Last Name</label><input type="text" id="eu-lname"></div>
+    </div>
+    <div class="form-group"><label>Email</label><input type="email" id="eu-email" readonly style="opacity:.6;cursor:not-allowed;"></div>
+    <div class="form-group"><label>Location</label><input type="text" id="eu-location"></div>
+    <div class="form-group"><label>Role</label>
+      <select id="eu-role">
+        <option value="user">General User</option>
+        <option value="operator">Operator</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-outline-green" onclick="closeModal('modal-edit-user')">Cancel</button>
+      <button class="btn btn-green" onclick="saveEditUser()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL: Material Detail ══════════ -->
+<div class="modal-overlay" id="modal-material-detail">
+  <div class="modal-box">
+    <div style="text-align:center;font-size:3rem;margin-bottom:.5rem;" id="md-icon">♻️</div>
+    <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:var(--forest);text-align:center;margin-bottom:.2rem;" id="md-name">Material Name</div>
+    <div style="text-align:center;font-size:.78rem;font-weight:700;color:var(--leaf);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.5rem;" id="md-cat">Category</div>
+    <div style="font-size:.95rem;font-weight:700;text-align:center;margin-bottom:1rem;" id="md-status">Status</div>
+    <div style="font-size:.88rem;color:#556b5e;line-height:1.65;margin-bottom:1.2rem;" id="md-desc"></div>
+    <div style="font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;color:var(--forest);margin-bottom:.6rem;">📍 Centers that accept this material:</div>
+    <div id="md-centers"></div>
+    <div class="modal-btns" style="margin-top:1.2rem;">
+      <button class="btn btn-green" onclick="closeModal('modal-material-detail')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL: Confirm Action ══════════ -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal-box" style="max-width:400px;">
+    <div class="modal-title">⚠️ Confirm Action</div>
+    <p style="font-size:.9rem;color:#556b5e;margin-bottom:1.5rem;line-height:1.6;" id="confirm-msg">Are you sure?</p>
+    <div class="modal-btns">
+      <button class="btn btn-outline-green" onclick="closeModal('modal-confirm')">Cancel</button>
+      <button class="btn btn-green" id="confirm-yes-btn" style="background:var(--red,#e05c5c);">Confirm</button>
+    </div>
+  </div>
+</div>
 
 <!-- TOAST -->
 <div class="toast" id="toast">✅ <span id="toast-msg">Action completed!</span></div>
+
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay" style="display:none;position:fixed;inset:0;background:rgba(255,255,255,0.85);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:1rem;">
+  <div style="width:48px;height:48px;border:5px solid #e0ece5;border-top-color:var(--forest,#2d5a3d);border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+  <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--forest,#2d5a3d);font-size:1rem;">Loading...</div>
+</div>
+
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
 
 <script src="app.js"></script>
 </body>
